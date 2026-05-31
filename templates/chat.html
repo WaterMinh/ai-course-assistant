@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-white p-3">
+                <h4 class="mb-0 fw-bold">
+                    Student Chatbot
+                </h4>
+                <div class="text-muted small">
+                    Ask questions based on uploaded course documents.
+                </div>
+            </div>
+
+            <div id="chatBox" class="card-body chat-box">
+                <div class="bot-message">
+                    Hello. Ask me about your course documents.
+                </div>
+            </div>
+
+            <div class="card-footer bg-white p-3">
+                <form id="chatForm" class="d-flex gap-2">
+                    <input
+                        id="questionInput"
+                        class="form-control"
+                        placeholder="Example: Final project cần làm gì?"
+                    >
+
+                    <button class="btn btn-primary px-4">
+                        Send
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/chat.js"></script>
+{% endblock %}

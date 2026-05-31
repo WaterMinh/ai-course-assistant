@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-body p-4">
+                <h3 class="mb-3 fw-bold">Login</h3>
+
+                {% if error %}
+                    <div class="alert alert-danger">
+                        {{ error }}
+                    </div>
+                {% endif %}
+
+                <form method="post" action="/login">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input
+                            class="form-control"
+                            name="username"
+                            placeholder="admin or student"
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input
+                            class="form-control"
+                            name="password"
+                            type="password"
+                            placeholder="admin123 or student123"
+                        >
+                    </div>
+
+                    <button class="btn btn-primary w-100">
+                        Login
+                    </button>
+                </form>
+
+                <div class="text-muted small mt-3">
+                    Demo: admin/admin123 or student/student123
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

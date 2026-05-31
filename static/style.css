@@ -1,0 +1,35 @@
+body {
+    background: #f5f7fb;
+}
+
+.chat-box {
+    height: 520px;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+
+.user-message,
+.bot-message {
+    padding: 12px 14px;
+    border-radius: 18px;
+    margin-bottom: 12px;
+    max-width: 85%;
+    white-space: pre-wrap;
+}
+
+.user-message {
+    background: #0d6efd;
+    color: white;
+    margin-left: auto;
+}
+
+.bot-message {
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #111827;
+}
+
+.loading {
+    opacity: 0.7;
+    font-style: italic;
+}

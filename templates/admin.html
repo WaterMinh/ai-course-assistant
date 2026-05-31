@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-3">
+                    Upload Course Document
+                </h4>
+
+                <form
+                    method="post"
+                    action="/upload"
+                    enctype="multipart/form-data"
+                >
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Document title
+                        </label>
+
+                        <input
+                            class="form-control"
+                            name="title"
+                            placeholder="Final project transcript"
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            File
+                        </label>
+
+                        <input
+                            class="form-control"
+                            name="file"
+                            type="file"
+                            accept=".pdf,.txt,.md"
+                        >
+                    </div>
+
+                    <button class="btn btn-primary w-100">
+                        Upload and Index
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-3">
+                    Documents
+                </h4>
+
+                {% if documents %}
+                    <div class="list-group">
+                        {% for doc in documents %}
+                            <div class="list-group-item">
+                                <div class="fw-semibold">
+                                    {{ doc.title }}
+                                </div>
+
+                                <div class="small text-muted">
+                                    {{ doc.filename }} | {{ doc.created_at }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-muted">
+                        No documents uploaded yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
