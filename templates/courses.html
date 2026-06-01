@@ -33,12 +33,21 @@
                                             </p>
                                         {% endif %}
 
-                                        <a
-                                            class="btn btn-primary btn-sm"
-                                            href="/courses/{{ course.id }}/chat"
-                                        >
-                                            Open Course Chat
-                                        </a>
+                                        <div class="d-flex gap-2">
+                                            <a
+                                                class="btn btn-primary btn-sm"
+                                                href="/courses/{{ course.id }}/chat"
+                                            >
+                                                Open Course Chat
+                                            </a>
+
+                                            <a
+                                                class="btn btn-outline-secondary btn-sm"
+                                                href="/courses/{{ course.id }}/summary"
+                                            >
+                                                Summary
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

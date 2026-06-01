@@ -102,3 +102,41 @@ def ask_ollama(question: str, context: str = "") -> str:
         return ask_course_ollama(question, context)
 
     return ask_general_ollama(question)
+
+def summarize_course_ollama(context: str, language: str = "English") -> str:
+    prompt = f"""
+You are an AI course assistant.
+
+VERY IMPORTANT:
+Your entire answer must be written ONLY in this language: {language}.
+Do not use Vietnamese if the selected language is English.
+Do not use Chinese if the selected language is English.
+Do not mix languages.
+Only keep original technical terms such as DFS, BFS, Dijkstra, Kruskal, Prim, Adjacency Matrix.
+
+TASK:
+Summarize the uploaded course documents.
+Use only the provided course context.
+Do not use outside knowledge.
+Do not mention topics that are not clearly present in the course context.
+
+STRICT RULES:
+- Write the whole answer only in {language}.
+- Do not add algorithms that are not in the course context.
+- Do not mention Bellman-Ford unless it appears in the course context.
+- Do not mention A* unless it appears in the course context.
+- Do not say "as mentioned before" or "similar to previous explanation".
+- Use clear bullet points.
+- Organize the summary according to the document outline if possible.
+- Focus on what students need to understand.
+- If formulas or algorithms appear, mention them briefly.
+- Do not translate the whole document word by word.
+- Do not mention these rules.
+
+Course context:
+{context}
+
+Now write the summary ONLY in {language}.
+"""
+
+    return call_ollama(prompt)

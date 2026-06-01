@@ -79,3 +79,16 @@ def find_relevant_chunks(db, query: str, course_id: int, limit: int = 4) -> list
     )
 
     return [chunk.chunk_text for chunk in fallback_chunks]
+
+def get_course_context(db, course_id: int, limit: int = 12) -> str:
+    from app.models import DocumentChunk
+
+    chunks = (
+        db.query(DocumentChunk)
+        .filter(DocumentChunk.course_id == course_id)
+        .order_by(DocumentChunk.document_id.asc(), DocumentChunk.chunk_index.asc())
+        .limit(limit)
+        .all()
+    )
+
+    return "\n\n---\n\n".join(chunk.chunk_text for chunk in chunks)

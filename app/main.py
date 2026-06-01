@@ -12,9 +12,18 @@ from app.config import SECRET_KEY, UPLOAD_DIR
 from app.database import Base, engine, get_db, SessionLocal
 from app.models import User, Course, Document, DocumentChunk, ChatHistory
 from app.auth import verify_password, create_demo_users
-from app.document_utils import extract_text_from_file, chunk_text, find_relevant_chunks
-from app.ollama_client import ask_general_ollama, ask_course_ollama
+from app.document_utils import (
+    extract_text_from_file,
+    chunk_text,
+    find_relevant_chunks,
+    get_course_context
+)
 
+from app.ollama_client import (
+    ask_general_ollama,
+    ask_course_ollama,
+    summarize_course_ollama
+)
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -359,6 +368,68 @@ async def course_chat_api(
         "answer": answer,
         "sources": chunks
     }
+
+@app.get("/courses/{course_id}/summary")
+def course_summary_page(
+    course_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    user = current_user(request, db)
+
+    if not user:
+        return RedirectResponse("/login")
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    return templates.TemplateResponse(
+        "summary.html",
+        {
+            "request": request,
+            "user": user,
+            "course": course,
+            "summary": None
+        }
+    )
+
+
+@app.post("/courses/{course_id}/summary")
+def generate_course_summary(
+    course_id: int,
+    request: Request,
+    language: str = Form("English"),
+    db: Session = Depends(get_db)
+):
+    user = current_user(request, db)
+
+    if not user:
+        return RedirectResponse("/login")
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    context = get_course_context(db, course_id=course.id)
+
+    if not context.strip():
+        summary = "No course documents have been uploaded yet."
+    else:
+        summary = summarize_course_ollama(context, language=language)
+
+    return templates.TemplateResponse(
+        "summary.html",
+        {
+            "request": request,
+            "user": user,
+            "course": course,
+            "summary": summary,
+            "language": language
+        }
+    )
 
 
 @app.get("/history")
