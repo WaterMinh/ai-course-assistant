@@ -10,10 +10,10 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import SECRET_KEY, UPLOAD_DIR
 from app.database import Base, engine, get_db, SessionLocal
-from app.models import User, Document, DocumentChunk, ChatHistory
+from app.models import User, Course, Document, DocumentChunk, ChatHistory
 from app.auth import verify_password, create_demo_users
 from app.document_utils import extract_text_from_file, chunk_text, find_relevant_chunks
-from app.ollama_client import ask_ollama
+from app.ollama_client import ask_general_ollama, ask_course_ollama
 
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -27,7 +27,7 @@ app.add_middleware(
 
 app.mount(
     "/static",
-    StaticFiles(directory="static"),
+    StaticFiles(directory="app/static"),
     name="static"
 )
 
@@ -55,7 +55,7 @@ def current_user(request: Request, db: Session):
 
 
 @app.get("/")
-def home(request: Request, db: Session = Depends(get_db)):
+def general_chat_page(request: Request, db: Session = Depends(get_db)):
     user = current_user(request, db)
 
     if not user:
@@ -65,7 +65,10 @@ def home(request: Request, db: Session = Depends(get_db)):
         "chat.html",
         {
             "request": request,
-            "user": user
+            "user": user,
+            "chat_title": "General Chat",
+            "chat_subtitle": "Ask general questions. This mode does not use course documents.",
+            "api_url": "/api/chat"
         }
     )
 
@@ -113,6 +116,54 @@ def logout(request: Request):
     return RedirectResponse("/login")
 
 
+@app.get("/courses")
+def courses_page(request: Request, db: Session = Depends(get_db)):
+    user = current_user(request, db)
+
+    if not user:
+        return RedirectResponse("/login")
+
+    courses = db.query(Course).order_by(Course.created_at.desc()).all()
+
+    return templates.TemplateResponse(
+        "courses.html",
+        {
+            "request": request,
+            "user": user,
+            "courses": courses
+        }
+    )
+
+
+@app.get("/courses/{course_id}/chat")
+def course_chat_page(
+    course_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    user = current_user(request, db)
+
+    if not user:
+        return RedirectResponse("/login")
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    return templates.TemplateResponse(
+        "chat.html",
+        {
+            "request": request,
+            "user": user,
+            "course": course,
+            "chat_title": f"{course.course_code} - {course.course_name}",
+            "chat_subtitle": "Ask questions based on this course's uploaded documents.",
+            "api_url": f"/api/courses/{course.id}/chat"
+        }
+    )
+
+
 @app.get("/admin")
 def admin_page(request: Request, db: Session = Depends(get_db)):
     user = current_user(request, db)
@@ -120,6 +171,7 @@ def admin_page(request: Request, db: Session = Depends(get_db)):
     if not user or user.role != "admin":
         return RedirectResponse("/login")
 
+    courses = db.query(Course).order_by(Course.created_at.desc()).all()
     documents = db.query(Document).order_by(Document.created_at.desc()).all()
 
     return templates.TemplateResponse(
@@ -127,14 +179,46 @@ def admin_page(request: Request, db: Session = Depends(get_db)):
         {
             "request": request,
             "user": user,
+            "courses": courses,
             "documents": documents
         }
     )
 
 
+@app.post("/admin/courses")
+def create_course(
+    request: Request,
+    course_code: str = Form(...),
+    course_name: str = Form(...),
+    description: str = Form(""),
+    db: Session = Depends(get_db)
+):
+    user = current_user(request, db)
+
+    if not user or user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    existing = db.query(Course).filter(Course.course_code == course_code).first()
+
+    if existing:
+        return RedirectResponse("/admin", status_code=303)
+
+    course = Course(
+        course_code=course_code.strip(),
+        course_name=course_name.strip(),
+        description=description.strip()
+    )
+
+    db.add(course)
+    db.commit()
+
+    return RedirectResponse("/admin", status_code=303)
+
+
 @app.post("/upload")
 def upload_document(
     request: Request,
+    course_id: int = Form(...),
     file: UploadFile = File(...),
     title: str = Form(...),
     db: Session = Depends(get_db)
@@ -143,6 +227,11 @@ def upload_document(
 
     if not user or user.role != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
 
     safe_name = file.filename.replace("/", "_").replace("\\", "_")
     file_path = os.path.join(UPLOAD_DIR, safe_name)
@@ -154,6 +243,7 @@ def upload_document(
     chunks = chunk_text(text)
 
     doc = Document(
+        course_id=course.id,
         title=title,
         filename=safe_name,
         uploaded_by=user.id
@@ -166,6 +256,7 @@ def upload_document(
         db.add(
             DocumentChunk(
                 document_id=doc.id,
+                course_id=course.id,
                 chunk_text=chunk,
                 chunk_index=i
             )
@@ -177,7 +268,7 @@ def upload_document(
 
 
 @app.post("/api/chat")
-async def chat_api(
+async def general_chat_api(
     request: Request,
     db: Session = Depends(get_db)
 ):
@@ -198,13 +289,64 @@ async def chat_api(
             status_code=400
         )
 
-    chunks = find_relevant_chunks(db, question)
-    context = "\n\n---\n\n".join(chunks)
-
-    answer = ask_ollama(question, context)
+    answer = ask_general_ollama(question)
 
     history = ChatHistory(
         user_id=user.id,
+        course_id=None,
+        question=question,
+        answer=answer,
+        source_context=None
+    )
+
+    db.add(history)
+    db.commit()
+
+    return {
+        "answer": answer,
+        "sources": []
+    }
+
+
+@app.post("/api/courses/{course_id}/chat")
+async def course_chat_api(
+    course_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    user = current_user(request, db)
+
+    if not user:
+        return JSONResponse(
+            {"error": "Not logged in"},
+            status_code=401
+        )
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        return JSONResponse(
+            {"error": "Course not found"},
+            status_code=404
+        )
+
+    data = await request.json()
+    question = data.get("question", "").strip()
+
+    if not question:
+        return JSONResponse(
+            {"error": "Question is empty"},
+            status_code=400
+        )
+
+    chunks = find_relevant_chunks(db, question, course_id=course.id)
+    context = "\n\n---\n\n".join(chunks)
+
+    answer = ask_course_ollama(question, context)
+
+    history = ChatHistory(
+        user_id=user.id,
+        course_id=course.id,
         question=question,
         answer=answer,
         source_context=context
