@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow border-0 rounded-4">
+    <div class="card-body p-4">
+        <h4 class="fw-bold mb-3">
+            Chat History
+        </h4>
+
+        {% if items %}
+            {% for item in items %}
+                <div class="border rounded-3 p-3 mb-3">
+                    <div class="fw-semibold">
+                        Q: {{ item.question }}
+                    </div>
+
+                    <div class="mt-2">
+                        A: {{ item.answer }}
+                    </div>
+
+                    <div class="text-muted small mt-2">
+                        {{ item.created_at }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-muted">
+                No chat history yet.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

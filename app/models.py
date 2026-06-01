@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from app.database import Base
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -12,14 +13,40 @@ class User(Base):
     role: Mapped[str] = mapped_column(String(20), default="student")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
+
+class Course(Base):
+    __tablename__ = "courses"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    course_code: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    course_name: Mapped[str] = mapped_column(String(255))
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    documents = relationship(
+        "Document",
+        back_populates="course",
+        cascade="all, delete-orphan"
+    )
+
+
 class Document(Base):
     __tablename__ = "documents"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    course_id: Mapped[int | None] = mapped_column(
+        ForeignKey("courses.id"),
+        nullable=True
+    )
     title: Mapped[str] = mapped_column(String(255))
     filename: Mapped[str] = mapped_column(String(255))
-    uploaded_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    uploaded_by: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    course = relationship("Course", back_populates="documents")
 
     chunks = relationship(
         "DocumentChunk",
@@ -27,21 +54,34 @@ class Document(Base):
         cascade="all, delete-orphan"
     )
 
+
 class DocumentChunk(Base):
     __tablename__ = "document_chunks"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     document_id: Mapped[int] = mapped_column(ForeignKey("documents.id"))
+    course_id: Mapped[int | None] = mapped_column(
+        ForeignKey("courses.id"),
+        nullable=True
+    )
     chunk_text: Mapped[str] = mapped_column(Text)
     chunk_index: Mapped[int] = mapped_column(Integer)
 
     document = relationship("Document", back_populates="chunks")
 
+
 class ChatHistory(Base):
     __tablename__ = "chat_history"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=True
+    )
+    course_id: Mapped[int | None] = mapped_column(
+        ForeignKey("courses.id"),
+        nullable=True
+    )
     question: Mapped[str] = mapped_column(Text)
     answer: Mapped[str] = mapped_column(Text)
     source_context: Mapped[str | None] = mapped_column(Text, nullable=True)
