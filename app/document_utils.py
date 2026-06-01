@@ -45,10 +45,14 @@ def simple_score(query: str, text: str) -> int:
     return sum(1 for word in query_words if word in text_lower)
 
 
-def find_relevant_chunks(db, query: str, limit: int = 4) -> list[str]:
-    from app.models import Document, DocumentChunk
+def find_relevant_chunks(db, query: str, course_id: int, limit: int = 4) -> list[str]:
+    from app.models import DocumentChunk
 
-    chunks = db.query(DocumentChunk).all()
+    chunks = (
+        db.query(DocumentChunk)
+        .filter(DocumentChunk.course_id == course_id)
+        .all()
+    )
 
     ranked = sorted(
         chunks,
@@ -65,40 +69,13 @@ def find_relevant_chunks(db, query: str, limit: int = 4) -> list[str]:
     if relevant:
         return relevant[:limit]
 
-    recent_words = [
-        "recent",
-        "recently",
-        "latest",
-        "last",
-        "newest",
-        "uploaded",
-        "document",
-        "file",
-        "tài liệu",
-        "mới",
-        "vừa tải",
-        "gần đây"
-    ]
+    # fallback: if keyword search fails, return first chunks from this course
+    fallback_chunks = (
+        db.query(DocumentChunk)
+        .filter(DocumentChunk.course_id == course_id)
+        .order_by(DocumentChunk.chunk_index.asc())
+        .limit(limit)
+        .all()
+    )
 
-    if any(word in query.lower() for word in recent_words):
-        latest_doc = (
-            db.query(Document)
-            .order_by(Document.created_at.desc())
-            .first()
-        )
-
-        if latest_doc:
-            latest_chunks = (
-                db.query(DocumentChunk)
-                .filter(DocumentChunk.document_id == latest_doc.id)
-                .order_by(DocumentChunk.chunk_index.asc())
-                .limit(limit)
-                .all()
-            )
-
-            return [
-                f"Document title: {latest_doc.title}\n\n{chunk.chunk_text}"
-                for chunk in latest_chunks
-            ]
-
-    return []
+    return [chunk.chunk_text for chunk in fallback_chunks]
