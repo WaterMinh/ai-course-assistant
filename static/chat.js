@@ -33,7 +33,9 @@ form.addEventListener("submit", async (e) => {
     loading.classList.add("loading");
 
     try {
-        const response = await fetch("/api/chat", {
+        const apiUrl = window.CHAT_API_URL || "/api/chat";
+
+        const response = await fetch(apiUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

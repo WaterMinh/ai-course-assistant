@@ -3,51 +3,160 @@
 {% block content %}
 <div class="row g-4">
     <div class="col-lg-5">
+        <div class="card shadow border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-3">
+                    Create Course
+                </h4>
+
+                <form method="post" action="/admin/courses">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Course Code
+                        </label>
+
+                        <input
+                            class="form-control"
+                            name="course_code"
+                            placeholder="DS101"
+                            required
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Course Name
+                        </label>
+
+                        <input
+                            class="form-control"
+                            name="course_name"
+                            placeholder="Data Structures"
+                            required
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Description
+                        </label>
+
+                        <textarea
+                            class="form-control"
+                            name="description"
+                            rows="3"
+                            placeholder="Course description..."
+                        ></textarea>
+                    </div>
+
+                    <button class="btn btn-primary w-100">
+                        Create Course
+                    </button>
+                </form>
+            </div>
+        </div>
+
         <div class="card shadow border-0 rounded-4">
             <div class="card-body p-4">
                 <h4 class="fw-bold mb-3">
                     Upload Course Document
                 </h4>
 
-                <form
-                    method="post"
-                    action="/upload"
-                    enctype="multipart/form-data"
-                >
-                    <div class="mb-3">
-                        <label class="form-label">
-                            Document title
-                        </label>
+                {% if courses %}
+                    <form
+                        method="post"
+                        action="/upload"
+                        enctype="multipart/form-data"
+                    >
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Course
+                            </label>
 
-                        <input
-                            class="form-control"
-                            name="title"
-                            placeholder="Final project transcript"
-                        >
+                            <select
+                                class="form-select"
+                                name="course_id"
+                                required
+                            >
+                                {% for course in courses %}
+                                    <option value="{{ course.id }}">
+                                        {{ course.course_code }} - {{ course.course_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Document title
+                            </label>
+
+                            <input
+                                class="form-control"
+                                name="title"
+                                placeholder="Graph lecture slides"
+                                required
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                File
+                            </label>
+
+                            <input
+                                class="form-control"
+                                name="file"
+                                type="file"
+                                accept=".pdf,.txt,.md"
+                                required
+                            >
+                        </div>
+
+                        <button class="btn btn-success w-100">
+                            Upload and Index
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="alert alert-warning">
+                        Create a course before uploading documents.
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">
-                            File
-                        </label>
-
-                        <input
-                            class="form-control"
-                            name="file"
-                            type="file"
-                            accept=".pdf,.txt,.md"
-                        >
-                    </div>
-
-                    <button class="btn btn-primary w-100">
-                        Upload and Index
-                    </button>
-                </form>
+                {% endif %}
             </div>
         </div>
     </div>
 
     <div class="col-lg-7">
+        <div class="card shadow border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-3">
+                    Courses
+                </h4>
+
+                {% if courses %}
+                    <div class="list-group">
+                        {% for course in courses %}
+                            <div class="list-group-item">
+                                <div class="fw-semibold">
+                                    {{ course.course_code }} - {{ course.course_name }}
+                                </div>
+
+                                {% if course.description %}
+                                    <div class="small text-muted">
+                                        {{ course.description }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-muted">
+                        No courses created yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
         <div class="card shadow border-0 rounded-4">
             <div class="card-body p-4">
                 <h4 class="fw-bold mb-3">
@@ -63,6 +172,9 @@
                                 </div>
 
                                 <div class="small text-muted">
+                                    {% if doc.course %}
+                                        {{ doc.course.course_code }} - {{ doc.course.course_name }} |
+                                    {% endif %}
                                     {{ doc.filename }} | {{ doc.created_at }}
                                 </div>
                             </div>

@@ -21,7 +21,8 @@
 
         <div class="d-flex gap-2">
             {% if user %}
-                <a class="btn btn-outline-light btn-sm" href="/">Chat</a>
+                <a class="btn btn-outline-light btn-sm" href="/">General Chat</a>
+                <a class="btn btn-outline-light btn-sm" href="/courses">Courses</a>
                 <a class="btn btn-outline-light btn-sm" href="/history">History</a>
 
                 {% if user.role == "admin" %}

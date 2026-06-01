@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-body p-4">
+                <h3 class="fw-bold mb-3">
+                    Courses
+                </h3>
+
+                <p class="text-muted">
+                    Choose a course to ask questions based on its uploaded documents.
+                </p>
+
+                {% if courses %}
+                    <div class="row g-3">
+                        {% for course in courses %}
+                            <div class="col-md-6">
+                                <div class="card border rounded-4 h-100">
+                                    <div class="card-body">
+                                        <h5 class="fw-bold">
+                                            {{ course.course_code }}
+                                        </h5>
+
+                                        <div class="mb-2">
+                                            {{ course.course_name }}
+                                        </div>
+
+                                        {% if course.description %}
+                                            <p class="text-muted small">
+                                                {{ course.description }}
+                                            </p>
+                                        {% endif %}
+
+                                        <a
+                                            class="btn btn-primary btn-sm"
+                                            href="/courses/{{ course.id }}/chat"
+                                        >
+                                            Open Course Chat
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No courses yet. Admin needs to create courses first.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
