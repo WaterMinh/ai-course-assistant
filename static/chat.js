@@ -2,6 +2,28 @@ const form = document.getElementById("chatForm");
 const input = document.getElementById("questionInput");
 const chatBox = document.getElementById("chatBox");
 
+function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function normalizeMath(text) {
+    return text
+        .replace(/\\\\\[/g, "\\[")
+        .replace(/\\\\\]/g, "\\]")
+        .replace(/\\\\\(/g, "\\(")
+        .replace(/\\\\\)/g, "\\)")
+        .replace(/\\\\frac/g, "\\frac");
+}
+
+async function renderMath(element) {
+    if (window.MathJax && window.MathJax.startup) {
+        await window.MathJax.startup.promise;
+        await window.MathJax.typesetPromise([element]);
+    }
+}
+
 function addMessage(text, type) {
     const div = document.createElement("div");
 
@@ -9,10 +31,13 @@ function addMessage(text, type) {
         ? "user-message"
         : "bot-message";
 
-    div.textContent = text;
+    const normalized = normalizeMath(text);
+    div.innerHTML = escapeHtml(normalized).replace(/\n/g, "<br>");
 
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
+
+    renderMath(div);
 
     return div;
 }
@@ -50,7 +75,9 @@ form.addEventListener("submit", async (e) => {
         if (!response.ok) {
             loading.textContent = data.error || "Error";
         } else {
-            loading.textContent = data.answer;
+            const normalized = normalizeMath(data.answer);
+            loading.innerHTML = escapeHtml(normalized).replace(/\n/g, "<br>");
+            renderMath(loading);
         }
     } catch (err) {
         loading.textContent = "Cannot connect to backend or Ollama.";

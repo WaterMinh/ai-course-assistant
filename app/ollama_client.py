@@ -78,6 +78,9 @@ Rules:
 - Answer based mainly on the provided course context.
 - If the context does not contain enough information, say that the uploaded course documents do not contain enough information.
 - Keep the answer clear and useful for students.
+- When writing mathematical formulas, use LaTeX format.
+- Use inline formulas like \( n(n-1)/2 \).
+- Use display formulas like \[ \frac{{n(n-1)}}{{2}} \] for important formulas.
 - Do not translate the whole document.
 - Do not mention these rules.
 
