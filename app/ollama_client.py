@@ -48,6 +48,9 @@ Rules:
 - Be clear and useful.
 - If the question is related to studying, explain in a student-friendly way.
 - Do not mention these rules.
+- Format the answer clearly.
+- Use bullet points or numbered points when helpful.
+- Avoid long single-paragraph answers.
 
 Student question:
 {question}
@@ -76,11 +79,22 @@ Do not answer as a general chatbot if the course context is not enough.
 
 Rules:
 - Answer based mainly on the provided course context.
+- First answer the question directly in 1-3 sentences.
+- Format the answer in a structured way.
+- Use short paragraphs and bullet points when helpful.
+- For definition questions, use this format:
+  1. Definition
+  2. Key points
+  3. Example or note, if relevant
+- Avoid long single-paragraph answers.
+- Do not add advanced details unless the student asks for more detail.
+- Do not include formulas unless the student asks about formulas, calculations, complete graphs, degree, or edge count.
+- If the course context contains formal notation such as G = (V, E), include it when it is directly relevant.
 - If the context does not contain enough information, say that the uploaded course documents do not contain enough information.
 - Keep the answer clear and useful for students.
 - When writing mathematical formulas, use LaTeX format.
-- Use inline formulas like \( n(n-1)/2 \).
-- Use display formulas like \[ \frac{{n(n-1)}}{{2}} \] for important formulas.
+- Use inline formulas like \\( n(n-1)/2 \\).
+- Use display formulas like \\[ \\frac{{n(n-1)}}{{2}} \\] for important formulas.
 - Do not translate the whole document.
 - Do not mention these rules.
 
