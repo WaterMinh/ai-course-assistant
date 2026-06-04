@@ -24,22 +24,25 @@ async function renderMath(element) {
     }
 }
 
-function addMessage(text, type) {
-    const div = document.createElement("div");
+function addMessage(text, sender) {
+    const row = document.createElement("div");
+    row.className = sender === "user"
+        ? "chat-row user-row"
+        : "chat-row bot-row";
 
-    div.className = type === "user"
-        ? "user-message"
-        : "bot-message";
+    const bubble = document.createElement("div");
+    bubble.className = sender === "user"
+        ? "chat-bubble user-message"
+        : "chat-bubble bot-message";
 
-    const normalized = normalizeMath(text);
-    div.innerHTML = escapeHtml(normalized).replace(/\n/g, "<br>");
+    bubble.textContent = text;
 
-    chatBox.appendChild(div);
+    row.appendChild(bubble);
+    chatBox.appendChild(row);
+
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    renderMath(div);
-
-    return div;
+    return bubble;
 }
 
 form.addEventListener("submit", async (e) => {
@@ -75,13 +78,15 @@ form.addEventListener("submit", async (e) => {
         if (!response.ok) {
             loading.textContent = data.error || "Error";
         } else {
-            const normalized = normalizeMath(data.answer);
+            const normalized = normalizeMath(data.answer || "No answer received.");
             loading.innerHTML = escapeHtml(normalized).replace(/\n/g, "<br>");
-            renderMath(loading);
+            await renderMath(loading);
         }
     } catch (err) {
         loading.textContent = "Cannot connect to backend or LM Studio.";
+        console.error(err);
     }
 
     loading.classList.remove("loading");
+    chatBox.scrollTop = chatBox.scrollHeight;
 });
