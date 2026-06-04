@@ -10,7 +10,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import SECRET_KEY, UPLOAD_DIR
 from app.database import Base, engine, get_db, SessionLocal
-from app.models import User, Course, Document, DocumentChunk, ChatHistory
+from app.models import User, Course, Document, DocumentChunk, DocumentSummary, ChatHistory
 from app.auth import verify_password, create_demo_users
 from app.document_utils import (
     extract_text_from_file,
@@ -370,6 +370,7 @@ async def course_chat_api(
         "sources": chunks
     }
 
+
 @app.get("/courses/{course_id}")
 def course_detail_page(
     course_id: int,
@@ -403,6 +404,7 @@ def course_detail_page(
         }
     )
 
+
 @app.get("/courses/{course_id}/summary")
 def course_summary_page(
     course_id: int,
@@ -425,7 +427,8 @@ def course_summary_page(
             "request": request,
             "user": user,
             "course": course,
-            "summary": None
+            "summary": None,
+            "language": "English"
         }
     )
 
@@ -500,7 +503,8 @@ def document_summary_page(
             "course": course,
             "document": document,
             "summary": None,
-            "language": "English"
+            "language": "English",
+            "from_cache": False
         }
     )
 
@@ -543,6 +547,29 @@ def generate_document_summary(
 
     print("Selected summary language:", language)
 
+    cached_summary = (
+        db.query(DocumentSummary)
+        .filter(
+            DocumentSummary.document_id == document.id,
+            DocumentSummary.language == language
+        )
+        .first()
+    )
+
+    if cached_summary:
+        return templates.TemplateResponse(
+            "document_summary.html",
+            {
+                "request": request,
+                "user": user,
+                "course": course,
+                "document": document,
+                "summary": cached_summary.summary_text,
+                "language": language,
+                "from_cache": True
+            }
+        )
+
     context = get_document_context(db, document_id=document.id)
 
     if not context.strip():
@@ -553,6 +580,27 @@ def generate_document_summary(
             language=language
         )
 
+    existing_summary = (
+        db.query(DocumentSummary)
+        .filter(
+            DocumentSummary.document_id == document.id,
+            DocumentSummary.language == language
+        )
+        .first()
+    )
+
+    if existing_summary:
+        existing_summary.summary_text = summary
+    else:
+        new_summary = DocumentSummary(
+            document_id=document.id,
+            language=language,
+            summary_text=summary
+        )
+        db.add(new_summary)
+
+    db.commit()
+
     return templates.TemplateResponse(
         "document_summary.html",
         {
@@ -561,9 +609,11 @@ def generate_document_summary(
             "course": course,
             "document": document,
             "summary": summary,
-            "language": language
+            "language": language,
+            "from_cache": False
         }
     )
+
 
 @app.get("/history")
 def history_page(request: Request, db: Session = Depends(get_db)):

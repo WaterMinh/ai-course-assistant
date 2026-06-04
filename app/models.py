@@ -69,6 +69,30 @@ class DocumentChunk(Base):
 
     document = relationship("Document", back_populates="chunks")
 
+class DocumentSummary(Base):
+    __tablename__ = "document_summaries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+
+    document_id: Mapped[int] = mapped_column(
+        ForeignKey("documents.id"),
+        index=True
+    )
+
+    language: Mapped[str] = mapped_column(String(80), index=True)
+
+    summary_text: Mapped[str] = mapped_column(Text)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    document = relationship("Document")
+
 
 class ChatHistory(Base):
     __tablename__ = "chat_history"

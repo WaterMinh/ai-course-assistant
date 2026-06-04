@@ -48,6 +48,12 @@
                 </form>
 
                 {% if summary %}
+                    {% if from_cache %}
+                        <div class="alert alert-success mb-3">
+                            Loaded from saved summary.
+                        </div>
+                    {% endif %}
+
                     <div class="bot-message w-100" style="max-width: 100%; white-space: pre-wrap;">
                         {{ summary }}
                     </div>
