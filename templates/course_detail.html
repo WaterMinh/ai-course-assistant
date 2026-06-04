@@ -40,27 +40,31 @@
                         {% for doc in documents %}
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="fw-semibold">
+                                    <h5 class="fw-bold mb-1">
                                         {{ doc.title }}
-                                    </div>
+                                    </h5>
 
                                     <div class="small text-muted">
                                         {{ doc.filename }} | {{ doc.created_at }}
                                     </div>
                                 </div>
 
-                                <a
-                                    class="btn btn-outline-primary btn-sm"
-                                    href="/courses/{{ course.id }}/documents/{{ doc.id }}/summary"
-                                >
-                                    Summary
-                                </a>
-                                <a
-                                    class="btn btn-outline-success btn-sm"
-                                    href="/courses/{{ course.id }}/documents/{{ doc.id }}/quiz"
-                                >
-                                    Quiz
-                                </a>
+                                <div class="d-flex gap-2">
+                                    <a
+                                        class="btn btn-outline-primary btn-sm"
+                                        href="/courses/{{ course.id }}/documents/{{ doc.id }}/summary"
+                                    >
+                                        Summary
+                                    </a>
+                                    <a
+                                        class="btn btn-outline-success btn-sm"
+                                        href="/courses/{{ course.id }}/documents/{{ doc.id }}/quiz"
+                                    >
+                                        Quiz
+                                    </a>
+
+                                </div>
+
                             </div>
                         {% endfor %}
                     </div>
