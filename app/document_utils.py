@@ -92,3 +92,16 @@ def get_course_context(db, course_id: int, limit: int = 12) -> str:
     )
 
     return "\n\n---\n\n".join(chunk.chunk_text for chunk in chunks)
+
+def get_document_context(db, document_id: int, limit: int = 10) -> str:
+    from app.models import DocumentChunk
+
+    chunks = (
+        db.query(DocumentChunk)
+        .filter(DocumentChunk.document_id == document_id)
+        .order_by(DocumentChunk.chunk_index.asc())
+        .limit(limit)
+        .all()
+    )
+
+    return "\n\n---\n\n".join(chunk.chunk_text for chunk in chunks)

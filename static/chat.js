@@ -80,7 +80,7 @@ form.addEventListener("submit", async (e) => {
             renderMath(loading);
         }
     } catch (err) {
-        loading.textContent = "Cannot connect to backend or Ollama.";
+        loading.textContent = "Cannot connect to backend or LM Studio.";
     }
 
     loading.classList.remove("loading");

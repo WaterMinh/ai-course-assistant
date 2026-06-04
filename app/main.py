@@ -16,13 +16,14 @@ from app.document_utils import (
     extract_text_from_file,
     chunk_text,
     find_relevant_chunks,
-    get_course_context
+    get_course_context,
+    get_document_context
 )
 
-from app.ollama_client import (
-    ask_general_ollama,
-    ask_course_ollama,
-    summarize_course_ollama
+from app.lmstudio_client import (
+    ask_general_lmstudio,
+    ask_course_lmstudio,
+    summarize_course_lmstudio
 )
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -298,7 +299,7 @@ async def general_chat_api(
             status_code=400
         )
 
-    answer = ask_general_ollama(question)
+    answer = ask_general_lmstudio(question)
 
     history = ChatHistory(
         user_id=user.id,
@@ -351,7 +352,7 @@ async def course_chat_api(
     chunks = find_relevant_chunks(db, question, course_id=course.id)
     context = "\n\n---\n\n".join(chunks)
 
-    answer = ask_course_ollama(question, context)
+    answer = ask_course_lmstudio(question, context)
 
     history = ChatHistory(
         user_id=user.id,
@@ -368,6 +369,39 @@ async def course_chat_api(
         "answer": answer,
         "sources": chunks
     }
+
+@app.get("/courses/{course_id}")
+def course_detail_page(
+    course_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    user = current_user(request, db)
+
+    if not user:
+        return RedirectResponse("/login")
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    documents = (
+        db.query(Document)
+        .filter(Document.course_id == course.id)
+        .order_by(Document.created_at.desc())
+        .all()
+    )
+
+    return templates.TemplateResponse(
+        "course_detail.html",
+        {
+            "request": request,
+            "user": user,
+            "course": course,
+            "documents": documents
+        }
+    )
 
 @app.get("/courses/{course_id}/summary")
 def course_summary_page(
@@ -418,7 +452,7 @@ def generate_course_summary(
     if not context.strip():
         summary = "No course documents have been uploaded yet."
     else:
-        summary = summarize_course_ollama(context, language=language)
+        summary = summarize_course_lmstudio(context, language=language)
 
     return templates.TemplateResponse(
         "summary.html",
@@ -431,6 +465,105 @@ def generate_course_summary(
         }
     )
 
+
+@app.get("/courses/{course_id}/documents/{document_id}/summary")
+def document_summary_page(
+    course_id: int,
+    document_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    user = current_user(request, db)
+
+    if not user:
+        return RedirectResponse("/login")
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    document = (
+        db.query(Document)
+        .filter(Document.id == document_id, Document.course_id == course.id)
+        .first()
+    )
+
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    return templates.TemplateResponse(
+        "document_summary.html",
+        {
+            "request": request,
+            "user": user,
+            "course": course,
+            "document": document,
+            "summary": None,
+            "language": "English"
+        }
+    )
+
+
+@app.post("/courses/{course_id}/documents/{document_id}/summary")
+def generate_document_summary(
+    course_id: int,
+    document_id: int,
+    request: Request,
+    language: str = Form("English"),
+    db: Session = Depends(get_db)
+):
+    user = current_user(request, db)
+
+    if not user:
+        return RedirectResponse("/login")
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    document = (
+        db.query(Document)
+        .filter(Document.id == document_id, Document.course_id == course.id)
+        .first()
+    )
+
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    language_map = {
+        "English": "English",
+        "Vietnamese": "Vietnamese",
+        "Traditional Chinese": "Traditional Chinese zh-TW",
+        "Traditional Chinese zh-TW": "Traditional Chinese zh-TW",
+    }
+
+    language = language_map.get(language, "English")
+
+    print("Selected summary language:", language)
+
+    context = get_document_context(db, document_id=document.id)
+
+    if not context.strip():
+        summary = "No document content is available."
+    else:
+        summary = summarize_course_lmstudio(
+            context=context,
+            language=language
+        )
+
+    return templates.TemplateResponse(
+        "document_summary.html",
+        {
+            "request": request,
+            "user": user,
+            "course": course,
+            "document": document,
+            "summary": summary,
+            "language": language
+        }
+    )
 
 @app.get("/history")
 def history_page(request: Request, db: Session = Depends(get_db)):

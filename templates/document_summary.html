@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-body p-4">
+                <h3 class="fw-bold mb-2">
+                    Document Summary
+                </h3>
+
+                <div class="text-muted mb-2">
+                    {{ course.course_code }} - {{ course.course_name }}
+                </div>
+
+                <div class="mb-4">
+                    <strong>{{ document.title }}</strong>
+                    <div class="small text-muted">
+                        {{ document.filename }}
+                    </div>
+                </div>
+
+                <form method="post" class="d-flex gap-2 mb-4">
+                    <select class="form-select" name="language" style="max-width: 220px;">
+                        <option value="English" {% if language == "English" %}selected{% endif %}>
+                            English
+                        </option>
+
+                        <option value="Vietnamese" {% if language == "Vietnamese" %}selected{% endif %}>
+                            Vietnamese
+                        </option>
+
+                        <option value="Traditional Chinese zh-TW" {% if language == "Traditional Chinese zh-TW" %}selected{% endif %}>
+                            Traditional Chinese
+                        </option>
+                    </select>
+
+                    <button class="btn btn-primary">
+                        Generate Summary
+                    </button>
+
+                    <a
+                        class="btn btn-outline-secondary"
+                        href="/courses/{{ course.id }}"
+                    >
+                        Back to Course
+                    </a>
+                </form>
+
+                {% if summary %}
+                    <div class="bot-message w-100" style="max-width: 100%; white-space: pre-wrap;">
+                        {{ summary }}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        Click Generate Summary to summarize this document.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function renderMathJax() {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise();
+        } else {
+            setTimeout(renderMathJax, 100);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", renderMathJax);
+    window.addEventListener("load", renderMathJax);
+</script>
+{% endblock %}

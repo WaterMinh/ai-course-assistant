@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-body p-4">
+                <h3 class="fw-bold mb-2">
+                    {{ course.course_code }} - {{ course.course_name }}
+                </h3>
+
+                {% if course.description %}
+                    <p class="text-muted">
+                        {{ course.description }}
+                    </p>
+                {% endif %}
+
+                <div class="d-flex gap-2 mb-4">
+                    <a
+                        class="btn btn-primary"
+                        href="/courses/{{ course.id }}/chat"
+                    >
+                        Open Course Chat
+                    </a>
+
+                    <a
+                        class="btn btn-outline-secondary"
+                        href="/courses"
+                    >
+                        Back to Courses
+                    </a>
+                </div>
+
+                <h5 class="fw-bold mb-3">
+                    Course Documents
+                </h5>
+
+                {% if documents %}
+                    <div class="list-group">
+                        {% for doc in documents %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold">
+                                        {{ doc.title }}
+                                    </div>
+
+                                    <div class="small text-muted">
+                                        {{ doc.filename }} | {{ doc.created_at }}
+                                    </div>
+                                </div>
+
+                                <a
+                                    class="btn btn-outline-primary btn-sm"
+                                    href="/courses/{{ course.id }}/documents/{{ doc.id }}/summary"
+                                >
+                                    Summary
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No documents uploaded for this course yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
