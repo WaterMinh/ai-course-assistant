@@ -93,6 +93,32 @@ class DocumentSummary(Base):
 
     document = relationship("Document")
 
+class DocumentQuiz(Base):
+    __tablename__ = "document_quizzes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+
+    document_id: Mapped[int] = mapped_column(
+        ForeignKey("documents.id"),
+        index=True
+    )
+
+    language: Mapped[str] = mapped_column(String(80), index=True)
+
+    question_count: Mapped[int] = mapped_column(Integer, default=5)
+
+    quiz_text: Mapped[str] = mapped_column(Text)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    document = relationship("Document")
+
 
 class ChatHistory(Base):
     __tablename__ = "chat_history"

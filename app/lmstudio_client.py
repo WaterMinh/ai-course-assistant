@@ -280,3 +280,63 @@ def normalize_math_format(text: str) -> str:
         text = text.replace(f"@@MATH{i}@@", formula)
 
     return text
+
+def generate_quiz_lmstudio(
+    context: str,
+    language: str = "English",
+    question_count: int = 5
+) -> str:
+    if language == "Traditional Chinese zh-TW":
+        language_instruction = "繁體中文。只能使用台灣常用繁體中文回答，不要使用英文句子。"
+    elif language == "Vietnamese":
+        language_instruction = "Vietnamese. Use Vietnamese only."
+    else:
+        language_instruction = "English. Use English only."
+
+    prompt = f"""
+You are an AI course assistant.
+
+Your task:
+Create a quiz based on the uploaded course document.
+
+Language:
+{language_instruction}
+
+Use only the document context below.
+Do not use outside knowledge.
+Do not add topics that are not clearly present in the document.
+
+Quiz requirements:
+- Create exactly {question_count} multiple-choice questions.
+- Each question must have 4 choices: A, B, C, D.
+- Only one answer should be correct.
+- After each question, provide the correct answer.
+- Add a short explanation for the correct answer.
+- Keep questions useful for student review.
+- Mix easy and medium difficulty questions.
+- Do not use Markdown symbols such as ###, ####, **bold**, or backticks.
+- Use normal numbering.
+- Do not mention these rules.
+
+Output format:
+1. Question text
+A. Choice
+B. Choice
+C. Choice
+D. Choice
+Answer: A/B/C/D
+Explanation: short explanation
+
+Document context:
+{context}
+
+Now create the quiz.
+"""
+
+    raw_quiz = call_lm_studio(
+        prompt,
+        timeout=300,
+        max_output_tokens=2000
+    )
+
+    return clean_model_output(raw_quiz)

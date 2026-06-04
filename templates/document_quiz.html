@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-body p-4">
+                <h3 class="fw-bold mb-2">
+                    Document Quiz
+                </h3>
+
+                <div class="text-muted mb-2">
+                    {{ course.course_code }} - {{ course.course_name }}
+                </div>
+
+                <div class="mb-4">
+                    <strong>{{ document.title }}</strong>
+                    <div class="small text-muted">
+                        {{ document.filename }}
+                    </div>
+                </div>
+
+                <form method="post" class="d-flex gap-2 mb-4">
+                    <select class="form-select" name="language" style="max-width: 260px;">
+                        <option value="English" {% if language == "English" %}selected{% endif %}>
+                            English
+                        </option>
+
+                        <option value="Vietnamese" {% if language == "Vietnamese" %}selected{% endif %}>
+                            Vietnamese
+                        </option>
+
+                        <option value="Traditional Chinese zh-TW" {% if language == "Traditional Chinese zh-TW" %}selected{% endif %}>
+                            Traditional Chinese
+                        </option>
+                    </select>
+
+                    <input
+                        class="form-control"
+                        type="number"
+                        name="question_count"
+                        min="1"
+                        max="10"
+                        value="{{ question_count }}"
+                        style="max-width: 120px;"
+                    >
+
+                    <button class="btn btn-primary">
+                        Generate Quiz
+                    </button>
+
+                    <a
+                        class="btn btn-outline-secondary"
+                        href="/courses/{{ course.id }}"
+                    >
+                        Back to Course
+                    </a>
+                </form>
+
+                {% if quiz %}
+                    {% if from_cache %}
+                        <div class="alert alert-success mb-3">
+                            Loaded from saved quiz.
+                        </div>
+                    {% endif %}
+
+                    <div
+                        id="quizText"
+                        class="d-none"
+                    >
+                        {{ quiz }}
+                    </div>
+
+                    <div
+                        id="quizContainer"
+                        class="w-100"
+                    >
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        Click Generate Quiz to create quiz questions from this document.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function renderQuizCards() {
+        const raw = document.getElementById("quizText");
+        const container = document.getElementById("quizContainer");
+
+        if (!raw || !container) {
+            return;
+        }
+
+        const text = raw.textContent.trim();
+
+        if (!text) {
+            return;
+        }
+
+        const blocks = text
+            .split(/\n(?=\d+\.\s)/)
+            .map(block => block.trim())
+            .filter(Boolean);
+
+        container.innerHTML = "";
+
+        blocks.forEach((block, index) => {
+            const lines = block.split("\n").map(line => line.trim()).filter(Boolean);
+
+            const answerIndex = lines.findIndex(line =>
+                line.toLowerCase().startsWith("answer:")
+            );
+
+            const explanationIndex = lines.findIndex(line =>
+                line.toLowerCase().startsWith("explanation:")
+            );
+
+            let questionLines = lines;
+            let answer = "";
+            let explanation = "";
+
+            if (answerIndex !== -1) {
+                questionLines = lines.slice(0, answerIndex);
+                answer = lines[answerIndex];
+
+                if (explanationIndex !== -1) {
+                    explanation = lines.slice(explanationIndex).join("\n");
+                }
+            }
+
+            const card = document.createElement("div");
+            card.className = "card border rounded-4 mb-3";
+
+            const body = document.createElement("div");
+            body.className = "card-body";
+
+            const questionDiv = document.createElement("div");
+            questionDiv.className = "mb-3";
+            questionDiv.style.whiteSpace = "pre-wrap";
+            questionDiv.textContent = questionLines.join("\n");
+
+            const button = document.createElement("button");
+            button.className = "btn btn-outline-success btn-sm mb-3";
+            button.type = "button";
+            button.textContent = "Show Answer";
+
+            const answerDiv = document.createElement("div");
+            answerDiv.className = "alert alert-success d-none";
+            answerDiv.style.whiteSpace = "pre-wrap";
+
+            let answerText = answer;
+
+            if (explanation) {
+                answerText += "\n" + explanation;
+            }
+
+            answerDiv.textContent = answerText || "No answer found.";
+
+            button.addEventListener("click", () => {
+                answerDiv.classList.toggle("d-none");
+
+                if (answerDiv.classList.contains("d-none")) {
+                    button.textContent = "Show Answer";
+                } else {
+                    button.textContent = "Hide Answer";
+                }
+            });
+
+            body.appendChild(questionDiv);
+            body.appendChild(button);
+            body.appendChild(answerDiv);
+
+            card.appendChild(body);
+            container.appendChild(card);
+        });
+    }
+
+    function renderMathJax() {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise();
+        } else {
+            setTimeout(renderMathJax, 100);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        renderQuizCards();
+        renderMathJax();
+    });
+
+    window.addEventListener("load", renderMathJax);
+</script>
+{% endblock %}

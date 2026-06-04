@@ -10,7 +10,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import SECRET_KEY, UPLOAD_DIR
 from app.database import Base, engine, get_db, SessionLocal
-from app.models import User, Course, Document, DocumentChunk, DocumentSummary, ChatHistory
+from app.models import User, Course, Document, DocumentChunk, DocumentSummary, DocumentQuiz, ChatHistory
 from app.auth import verify_password, create_demo_users
 from app.document_utils import (
     extract_text_from_file,
@@ -23,7 +23,8 @@ from app.document_utils import (
 from app.lmstudio_client import (
     ask_general_lmstudio,
     ask_course_lmstudio,
-    summarize_course_lmstudio
+    summarize_course_lmstudio,
+    generate_quiz_lmstudio
 )
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -614,6 +615,147 @@ def generate_document_summary(
         }
     )
 
+@app.get("/courses/{course_id}/documents/{document_id}/quiz")
+def document_quiz_page(
+    course_id: int,
+    document_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    user = current_user(request, db)
+
+    if not user:
+        return RedirectResponse("/login")
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    document = (
+        db.query(Document)
+        .filter(Document.id == document_id, Document.course_id == course.id)
+        .first()
+    )
+
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    return templates.TemplateResponse(
+        "document_quiz.html",
+        {
+            "request": request,
+            "user": user,
+            "course": course,
+            "document": document,
+            "quiz": None,
+            "language": "English",
+            "question_count": 5,
+            "from_cache": False
+        }
+    )
+@app.post("/courses/{course_id}/documents/{document_id}/quiz")
+def generate_document_quiz(
+    course_id: int,
+    document_id: int,
+    request: Request,
+    language: str = Form("English"),
+    question_count: int = Form(5),
+    db: Session = Depends(get_db)
+):
+    user = current_user(request, db)
+
+    if not user:
+        return RedirectResponse("/login")
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    document = (
+        db.query(Document)
+        .filter(Document.id == document_id, Document.course_id == course.id)
+        .first()
+    )
+
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    language_map = {
+        "English": "English",
+        "Vietnamese": "Vietnamese",
+        "Traditional Chinese": "Traditional Chinese zh-TW",
+        "Traditional Chinese zh-TW": "Traditional Chinese zh-TW",
+    }
+
+    language = language_map.get(language, "English")
+
+    if question_count < 1:
+        question_count = 1
+
+    if question_count > 10:
+        question_count = 10
+
+    cached_quiz = (
+        db.query(DocumentQuiz)
+        .filter(
+            DocumentQuiz.document_id == document.id,
+            DocumentQuiz.language == language,
+            DocumentQuiz.question_count == question_count
+        )
+        .first()
+    )
+
+    if cached_quiz:
+        return templates.TemplateResponse(
+            "document_quiz.html",
+            {
+                "request": request,
+                "user": user,
+                "course": course,
+                "document": document,
+                "quiz": cached_quiz.quiz_text,
+                "language": language,
+                "question_count": question_count,
+                "from_cache": True
+            }
+        )
+
+    context = get_document_context(db, document_id=document.id)
+
+    if not context.strip():
+        quiz = "No document content is available."
+    else:
+        quiz = generate_quiz_lmstudio(
+            context=context,
+            language=language,
+            question_count=question_count
+        )
+
+    new_quiz = DocumentQuiz(
+        document_id=document.id,
+        language=language,
+        question_count=question_count,
+        quiz_text=quiz
+    )
+
+    db.add(new_quiz)
+    db.commit()
+
+    return templates.TemplateResponse(
+        "document_quiz.html",
+        {
+            "request": request,
+            "user": user,
+            "course": course,
+            "document": document,
+            "quiz": quiz,
+            "language": language,
+            "question_count": question_count,
+            "from_cache": False
+        }
+    )
 
 @app.get("/history")
 def history_page(request: Request, db: Session = Depends(get_db)):
