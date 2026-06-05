@@ -17,7 +17,7 @@
                     <div class="row g-3">
                         {% for course in courses %}
                             <div class="col-md-6">
-                                <div class="card border rounded-4 h-100">
+                                <div class="card course-card border rounded-4 h-100">
                                     <div class="card-body">
                                         <h5 class="fw-bold">
                                             {{ course.course_code }}
@@ -28,12 +28,12 @@
                                         </div>
 
                                         {% if course.description %}
-                                            <p class="text-muted small">
+                                            <p class="course-description text-muted small">
                                                 {{ course.description }}
                                             </p>
                                         {% endif %}
 
-                                        <div class="d-flex gap-2">
+                                        <div class="d-flex gap-2 mt-4">
                                             <a
                                                 class="btn btn-primary btn-sm"
                                                 href="/courses/{{ course.id }}"
