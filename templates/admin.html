@@ -1,192 +1,222 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row g-4">
-    <div class="col-lg-5">
-        <div class="card shadow border-0 rounded-4 mb-4">
-            <div class="card-body p-4">
-                <h4 class="fw-bold mb-3">
-                    Create Course
-                </h4>
+<div class="row mb-4">
+  <div class="col-lg-10 mx-auto">
 
-                <form method="post" action="/admin/courses">
-                    <div class="mb-3">
-                        <label class="form-label">
-                            Course Code
-                        </label>
-
-                        <input
-                            class="form-control"
-                            name="course_code"
-                            placeholder="DS101"
-                            required
-                        >
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">
-                            Course Name
-                        </label>
-
-                        <input
-                            class="form-control"
-                            name="course_name"
-                            placeholder="Data Structures"
-                            required
-                        >
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">
-                            Description
-                        </label>
-
-                        <textarea
-                            class="form-control"
-                            name="description"
-                            rows="3"
-                            placeholder="Course description..."
-                        ></textarea>
-                    </div>
-
-                    <button class="btn btn-primary w-100">
-                        Create Course
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <div class="card shadow border-0 rounded-4">
-            <div class="card-body p-4">
-                <h4 class="fw-bold mb-3">
-                    Upload Course Document
-                </h4>
-
-                {% if courses %}
-                    <form
-                        method="post"
-                        action="/upload"
-                        enctype="multipart/form-data"
-                    >
-                        <div class="mb-3">
-                            <label class="form-label">
-                                Course
-                            </label>
-
-                            <select
-                                class="form-select"
-                                name="course_id"
-                                required
-                            >
-                                {% for course in courses %}
-                                    <option value="{{ course.id }}">
-                                        {{ course.course_code }} - {{ course.course_name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">
-                                Document title
-                            </label>
-
-                            <input
-                                class="form-control"
-                                name="title"
-                                placeholder="Graph lecture slides"
-                                required
-                            >
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">
-                                File
-                            </label>
-
-                            <input
-                                class="form-control"
-                                name="file"
-                                type="file"
-                                accept=".pdf,.txt,.md"
-                                required
-                            >
-                        </div>
-
-                        <button class="btn btn-success w-100">
-                            Upload and Index
-                        </button>
-                    </form>
-                {% else %}
-                    <div class="alert alert-warning">
-                        Create a course before uploading documents.
-                    </div>
-                {% endif %}
-            </div>
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="fw-bold mb-1">Admin Dashboard</h1>
+        <p class="text-muted mb-0">
+          Manage courses, upload documents, and monitor generated learning content.
+        </p>
+      </div>
     </div>
 
-    <div class="col-lg-7">
-        <div class="card shadow border-0 rounded-4 mb-4">
-            <div class="card-body p-4">
-                <h4 class="fw-bold mb-3">
-                    Courses
-                </h4>
-
-                {% if courses %}
-                    <div class="list-group">
-                        {% for course in courses %}
-                            <div class="list-group-item">
-                                <div class="fw-semibold">
-                                    {{ course.course_code }} - {{ course.course_name }}
-                                </div>
-
-                                {% if course.description %}
-                                    <div class="small text-muted">
-                                        {{ course.description }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-muted">
-                        No courses created yet.
-                    </div>
-                {% endif %}
-            </div>
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="admin-stat-card">
+          <div class="stat-label">Courses</div>
+          <div class="stat-value">{{ course_count }}</div>
         </div>
+      </div>
 
-        <div class="card shadow border-0 rounded-4">
-            <div class="card-body p-4">
-                <h4 class="fw-bold mb-3">
-                    Documents
-                </h4>
-
-                {% if documents %}
-                    <div class="list-group">
-                        {% for doc in documents %}
-                            <div class="list-group-item">
-                                <div class="fw-semibold">
-                                    {{ doc.title }}
-                                </div>
-
-                                <div class="small text-muted">
-                                    {% if doc.course %}
-                                        {{ doc.course.course_code }} - {{ doc.course.course_name }} |
-                                    {% endif %}
-                                    {{ doc.filename }} | {{ doc.created_at }}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-muted">
-                        No documents uploaded yet.
-                    </div>
-                {% endif %}
-            </div>
+      <div class="col-md-3">
+        <div class="admin-stat-card">
+          <div class="stat-label">Documents</div>
+          <div class="stat-value">{{ document_count }}</div>
         </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="admin-stat-card">
+          <div class="stat-label">Summaries</div>
+          <div class="stat-value">{{ summary_count }}</div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="admin-stat-card">
+          <div class="stat-label">Quizzes</div>
+          <div class="stat-value">{{ quiz_count }}</div>
+        </div>
+      </div>
     </div>
+
+    <div class="card shadow-lg border-0 rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h4 class="fw-bold mb-3">Create New Course</h4>
+
+        <form method="post" action="/admin/courses" class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Course Code</label>
+            <input
+              name="course_code"
+              class="form-control"
+              placeholder="Example: CS101"
+              required
+            >
+          </div>
+
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Course Name</label>
+            <input
+              name="course_name"
+              class="form-control"
+              placeholder="Example: Data Structures"
+              required
+            >
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Description</label>
+            <input
+              name="description"
+              class="form-control"
+              placeholder="Short course description"
+            >
+          </div>
+
+          <div class="col-12">
+            <button class="btn btn-primary px-4">
+              Create Course
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h4 class="fw-bold mb-3">Upload Document</h4>
+
+        <form method="post" action="/upload" enctype="multipart/form-data" class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Course</label>
+            <select name="course_id" class="form-select" required>
+              {% for course in courses %}
+                <option value="{{ course.id }}">
+                  {{ course.course_code }} - {{ course.course_name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Document Title</label>
+            <input
+              name="title"
+              class="form-control"
+              placeholder="Example: Graph Lecture Notes"
+              required
+            >
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">File</label>
+            <input
+              type="file"
+              name="file"
+              class="form-control"
+              required
+            >
+          </div>
+
+          <div class="col-12">
+            <button class="btn btn-success px-4">
+              Upload Document
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold mb-0">Courses</h4>
+          <span class="badge bg-primary-subtle text-primary">
+            {{ course_count }} total
+          </span>
+        </div>
+
+        {% if courses %}
+          <div class="table-responsive">
+            <table class="table align-middle admin-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th class="text-end">Open</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for course in courses %}
+                  <tr>
+                    <td class="fw-bold">{{ course.course_code }}</td>
+                    <td>{{ course.course_name }}</td>
+                    <td class="text-muted">{{ course.description }}</td>
+                    <td class="text-end">
+                      <a href="/courses/{{ course.id }}" class="btn btn-outline-primary btn-sm">
+                        View
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">No courses have been created yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold mb-0">Uploaded Documents</h4>
+          <span class="badge bg-success-subtle text-success">
+            {{ document_count }} total
+          </span>
+        </div>
+
+        {% if documents %}
+          <div class="table-responsive">
+            <table class="table align-middle admin-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Filename</th>
+                  <th>Course</th>
+                  <th>Uploaded</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for doc in documents %}
+                  <tr>
+                    <td class="fw-semibold">{{ doc.title }}</td>
+                    <td class="text-muted">{{ doc.filename }}</td>
+                    <td>
+                      {% for course in courses %}
+                        {% if course.id == doc.course_id %}
+                          {{ course.course_code }}
+                        {% endif %}
+                      {% endfor %}
+                    </td>
+                    <td class="text-muted small">{{ doc.created_at }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">No documents have been uploaded yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
 </div>
 {% endblock %}

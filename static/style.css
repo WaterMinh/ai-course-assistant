@@ -563,3 +563,49 @@ main.container {
 #rawQuizText {
     white-space: pre-wrap;
 }
+.admin-stat-card {
+    padding: 22px 20px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.admin-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.14);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.stat-value {
+    margin-top: 8px;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.admin-table {
+    margin-bottom: 0;
+}
+
+.admin-table thead th {
+    font-size: 0.85rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-table tbody td {
+    padding-top: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f1f5f9;
+}

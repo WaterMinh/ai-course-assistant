@@ -184,14 +184,22 @@ def admin_page(request: Request, db: Session = Depends(get_db)):
 
     courses = db.query(Course).order_by(Course.created_at.desc()).all()
     documents = db.query(Document).order_by(Document.created_at.desc()).all()
-
+    
+    course_count = db.query(Course).count()
+    document_count = db.query(Document).count()
+    summary_count = db.query(DocumentSummary).count()
+    quiz_count = db.query(DocumentQuiz).count()
     return templates.TemplateResponse(
         "admin.html",
         {
             "request": request,
             "user": user,
             "courses": courses,
-            "documents": documents
+            "documents": documents,
+            "course_count": course_count,
+            "document_count": document_count,
+            "summary_count": summary_count,
+            "quiz_count": quiz_count
         }
     )
 
