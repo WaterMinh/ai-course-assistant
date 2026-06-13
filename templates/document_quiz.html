@@ -2,199 +2,186 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-lg-10 mx-auto">
-        <div class="card shadow border-0 rounded-4">
-            <div class="card-body p-4">
-                <h3 class="fw-bold mb-2">
-                    Document Quiz
-                </h3>
+  <div class="col-lg-9 mx-auto">
 
-                <div class="text-muted mb-2">
-                    {{ course.course_code }} - {{ course.course_name }}
-                </div>
-
-                <div class="mb-4">
-                    <strong>{{ document.title }}</strong>
-                    <div class="small text-muted">
-                        {{ document.filename }}
-                    </div>
-                </div>
-
-                <form method="post" class="d-flex gap-2 mb-4">
-                    <select class="form-select" name="language" style="max-width: 260px;">
-                        <option value="English" {% if language == "English" %}selected{% endif %}>
-                            English
-                        </option>
-
-                        <option value="Vietnamese" {% if language == "Vietnamese" %}selected{% endif %}>
-                            Vietnamese
-                        </option>
-
-                        <option value="Traditional Chinese zh-TW" {% if language == "Traditional Chinese zh-TW" %}selected{% endif %}>
-                            Traditional Chinese
-                        </option>
-                    </select>
-
-                    <input
-                        class="form-control"
-                        type="number"
-                        name="question_count"
-                        min="1"
-                        max="10"
-                        value="{{ question_count }}"
-                        style="max-width: 120px;"
-                    >
-
-                    <button class="btn btn-primary">
-                        Generate Quiz
-                    </button>
-                    <button type="submit" name="regenerate" value="1" class="btn btn-outline-danger">
-                        Regenerate
-                    </button>
-
-                    <a
-                        class="btn btn-outline-secondary"
-                        href="/courses/{{ course.id }}"
-                    >
-                        Back to Course
-                    </a>
-                </form>
-
-                {% if quiz %}
-                    {% if from_cache %}
-                        <div class="alert alert-success mb-3">
-                            Loaded from saved quiz.
-                        </div>
-                    {% endif %}
-
-                    <div
-                        id="quizText"
-                        class="d-none"
-                    >
-                        {{ quiz }}
-                    </div>
-
-                    <div
-                        id="quizContainer"
-                        class="w-100"
-                    >
-                    </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        Click Generate Quiz to create quiz questions from this document.
-                    </div>
-                {% endif %}
+    <div class="card shadow-lg border-0 rounded-4 mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <h2 class="fw-bold mb-1">Document Quiz</h2>
+            <div class="text-muted">
+              {{ course.course_code }} - {{ course.course_name }}
             </div>
+            <div class="small text-muted mt-1">
+              Document: {{ document.title }}
+            </div>
+          </div>
+
+          <a href="/courses/{{ course.id }}" class="btn btn-outline-secondary btn-sm">
+            Back to Course
+          </a>
         </div>
+
+        <hr>
+
+        <form method="post" class="row g-3 align-items-end">
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Language</label>
+            <select name="language" class="form-select">
+              <option value="English" {% if language == "English" %}selected{% endif %}>English</option>
+              <option value="Vietnamese" {% if language == "Vietnamese" %}selected{% endif %}>Vietnamese</option>
+              <option value="Traditional Chinese" {% if language == "Traditional Chinese zh-TW" %}selected{% endif %}>
+                Traditional Chinese
+              </option>
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Questions</label>
+            <input
+              type="number"
+              name="question_count"
+              class="form-control"
+              min="1"
+              max="10"
+              value="{{ question_count }}"
+            >
+          </div>
+
+          <div class="col-md-4">
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-success w-100">
+                Generate Quiz
+              </button>
+
+              <button type="submit" name="regenerate" value="1" class="btn btn-outline-danger w-100">
+                Regenerate
+              </button>
+            </div>
+          </div>
+        </form>
+
+        {% if from_cache %}
+          <div class="alert alert-info mt-3 mb-0">
+            Loaded from saved quiz.
+          </div>
+        {% endif %}
+      </div>
     </div>
+
+    {% if quiz %}
+      <div class="quiz-container" id="quizContainer">
+        <pre id="rawQuizText" class="d-none">{{ quiz }}</pre>
+      </div>
+    {% else %}
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4 text-muted">
+          Choose language and question count, then click Generate Quiz.
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
 </div>
 
 <script>
-    function renderQuizCards() {
-        const raw = document.getElementById("quizText");
-        const container = document.getElementById("quizContainer");
+document.addEventListener("DOMContentLoaded", function () {
+  const raw = document.getElementById("rawQuizText");
+  const container = document.getElementById("quizContainer");
 
-        if (!raw || !container) {
-            return;
-        }
+  if (!raw || !container) return;
 
-        const text = raw.textContent.trim();
+  const text = raw.textContent.trim();
 
-        if (!text) {
-            return;
-        }
+  function escapeHtml(value) {
+    const div = document.createElement("div");
+    div.textContent = value;
+    return div.innerHTML;
+  }
 
-        const blocks = text
-            .split(/\n(?=\d+\.\s)/)
-            .map(block => block.trim())
-            .filter(Boolean);
+  function splitQuestions(text) {
+    const blocks = text
+      .split(/\n(?=\s*(?:Question\s*)?\d+[\.\)]\s+)/i)
+      .map(block => block.trim())
+      .filter(Boolean);
 
-        container.innerHTML = "";
-
-        blocks.forEach((block, index) => {
-            const lines = block.split("\n").map(line => line.trim()).filter(Boolean);
-
-            const answerIndex = lines.findIndex(line =>
-                line.toLowerCase().startsWith("answer:")
-            );
-
-            const explanationIndex = lines.findIndex(line =>
-                line.toLowerCase().startsWith("explanation:")
-            );
-
-            let questionLines = lines;
-            let answer = "";
-            let explanation = "";
-
-            if (answerIndex !== -1) {
-                questionLines = lines.slice(0, answerIndex);
-                answer = lines[answerIndex];
-
-                if (explanationIndex !== -1) {
-                    explanation = lines.slice(explanationIndex).join("\n");
-                }
-            }
-
-            const card = document.createElement("div");
-            card.className = "card border rounded-4 mb-3";
-
-            const body = document.createElement("div");
-            body.className = "card-body";
-
-            const questionDiv = document.createElement("div");
-            questionDiv.className = "mb-3";
-            questionDiv.style.whiteSpace = "pre-wrap";
-            questionDiv.textContent = questionLines.join("\n");
-
-            const button = document.createElement("button");
-            button.className = "btn btn-outline-success btn-sm mb-3";
-            button.type = "button";
-            button.textContent = "Show Answer";
-
-            const answerDiv = document.createElement("div");
-            answerDiv.className = "alert alert-success d-none";
-            answerDiv.style.whiteSpace = "pre-wrap";
-
-            let answerText = answer;
-
-            if (explanation) {
-                answerText += "\n" + explanation;
-            }
-
-            answerDiv.textContent = answerText || "No answer found.";
-
-            button.addEventListener("click", () => {
-                answerDiv.classList.toggle("d-none");
-
-                if (answerDiv.classList.contains("d-none")) {
-                    button.textContent = "Show Answer";
-                } else {
-                    button.textContent = "Hide Answer";
-                }
-            });
-
-            body.appendChild(questionDiv);
-            body.appendChild(button);
-            body.appendChild(answerDiv);
-
-            card.appendChild(body);
-            container.appendChild(card);
-        });
+    if (blocks.length <= 1) {
+      return text
+        .split(/\n\s*\n/)
+        .map(block => block.trim())
+        .filter(Boolean);
     }
 
-    function renderMathJax() {
-        if (window.MathJax && window.MathJax.typesetPromise) {
-            MathJax.typesetPromise();
-        } else {
-            setTimeout(renderMathJax, 100);
-        }
+    return blocks;
+  }
+
+  function findAnswerIndex(lines) {
+    return lines.findIndex(line =>
+      /^(answer|correct answer|đáp án|答案)\s*[:：]/i.test(line.trim())
+    );
+  }
+
+  const questions = splitQuestions(text);
+
+  container.innerHTML = "";
+
+  questions.forEach((block, index) => {
+    const lines = block.split("\n").map(line => line.trim()).filter(Boolean);
+    const answerIndex = findAnswerIndex(lines);
+
+    let questionLines = lines;
+    let answerLines = [];
+
+    if (answerIndex !== -1) {
+      questionLines = lines.slice(0, answerIndex);
+      answerLines = lines.slice(answerIndex);
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        renderQuizCards();
-        renderMathJax();
-    });
+    const card = document.createElement("div");
+    card.className = "quiz-card card border-0 shadow-sm rounded-4 mb-4";
 
-    window.addEventListener("load", renderMathJax);
+    const body = document.createElement("div");
+    body.className = "card-body p-4";
+
+    const header = document.createElement("div");
+    header.className = "quiz-question-number";
+    header.textContent = "Question " + (index + 1);
+
+    const question = document.createElement("div");
+    question.className = "quiz-question-text";
+    question.innerHTML = escapeHtml(questionLines.join("\n")).replace(/\n/g, "<br>");
+
+    body.appendChild(header);
+    body.appendChild(question);
+
+    if (answerLines.length > 0) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn btn-outline-success btn-sm mt-3";
+      btn.textContent = "Show Answer";
+
+      const answer = document.createElement("div");
+      answer.className = "quiz-answer-box mt-3 d-none";
+      answer.innerHTML = escapeHtml(answerLines.join("\n")).replace(/\n/g, "<br>");
+
+      btn.addEventListener("click", function () {
+        answer.classList.toggle("d-none");
+        btn.textContent = answer.classList.contains("d-none")
+          ? "Show Answer"
+          : "Hide Answer";
+      });
+
+      body.appendChild(btn);
+      body.appendChild(answer);
+    }
+
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([container]);
+  }
+});
 </script>
 {% endblock %}
