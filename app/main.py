@@ -516,6 +516,7 @@ def generate_document_summary(
     document_id: int,
     request: Request,
     language: str = Form("English"),
+    regenerate: str = Form("0"),
     db: Session = Depends(get_db)
 ):
     user = current_user(request, db)
@@ -547,6 +548,7 @@ def generate_document_summary(
     language = language_map.get(language, "English")
 
     print("Selected summary language:", language)
+    print("Regenerate summary:", regenerate)
 
     cached_summary = (
         db.query(DocumentSummary)
@@ -557,7 +559,7 @@ def generate_document_summary(
         .first()
     )
 
-    if cached_summary:
+    if cached_summary and regenerate != "1":
         return templates.TemplateResponse(
             "document_summary.html",
             {
@@ -581,17 +583,8 @@ def generate_document_summary(
             language=language
         )
 
-    existing_summary = (
-        db.query(DocumentSummary)
-        .filter(
-            DocumentSummary.document_id == document.id,
-            DocumentSummary.language == language
-        )
-        .first()
-    )
-
-    if existing_summary:
-        existing_summary.summary_text = summary
+    if cached_summary:
+        cached_summary.summary_text = summary
     else:
         new_summary = DocumentSummary(
             document_id=document.id,
@@ -614,6 +607,7 @@ def generate_document_summary(
             "from_cache": False
         }
     )
+
 
 @app.get("/courses/{course_id}/documents/{document_id}/quiz")
 def document_quiz_page(
@@ -654,6 +648,8 @@ def document_quiz_page(
             "from_cache": False
         }
     )
+
+
 @app.post("/courses/{course_id}/documents/{document_id}/quiz")
 def generate_document_quiz(
     course_id: int,
@@ -661,6 +657,7 @@ def generate_document_quiz(
     request: Request,
     language: str = Form("English"),
     question_count: int = Form(5),
+    regenerate: str = Form("0"),
     db: Session = Depends(get_db)
 ):
     user = current_user(request, db)
@@ -697,6 +694,10 @@ def generate_document_quiz(
     if question_count > 10:
         question_count = 10
 
+    print("Selected quiz language:", language)
+    print("Quiz question count:", question_count)
+    print("Regenerate quiz:", regenerate)
+
     cached_quiz = (
         db.query(DocumentQuiz)
         .filter(
@@ -707,7 +708,7 @@ def generate_document_quiz(
         .first()
     )
 
-    if cached_quiz:
+    if cached_quiz and regenerate != "1":
         return templates.TemplateResponse(
             "document_quiz.html",
             {
@@ -733,14 +734,17 @@ def generate_document_quiz(
             question_count=question_count
         )
 
-    new_quiz = DocumentQuiz(
-        document_id=document.id,
-        language=language,
-        question_count=question_count,
-        quiz_text=quiz
-    )
+    if cached_quiz:
+        cached_quiz.quiz_text = quiz
+    else:
+        new_quiz = DocumentQuiz(
+            document_id=document.id,
+            language=language,
+            question_count=question_count,
+            quiz_text=quiz
+        )
+        db.add(new_quiz)
 
-    db.add(new_quiz)
     db.commit()
 
     return templates.TemplateResponse(
@@ -756,6 +760,7 @@ def generate_document_quiz(
             "from_cache": False
         }
     )
+
 
 @app.get("/history")
 def history_page(request: Request, db: Session = Depends(get_db)):
