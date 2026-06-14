@@ -16,10 +16,15 @@
               Document: {{ document.title }}
             </div>
           </div>
+          <div class="d-flex gap-2 no-print">
+            <button type="button" onclick="window.print()" class="btn btn-outline-dark btn-sm">
+                Export PDF
+            </button>
 
-          <a href="/courses/{{ course.id }}" class="btn btn-outline-secondary btn-sm">
-            Back to Course
-          </a>
+            <a href="/courses/{{ course.id }}" class="btn btn-outline-secondary btn-sm">
+                Back to Course
+            </a>
+          </div>
         </div>
 
         <hr>
@@ -29,7 +34,6 @@
             <label class="form-label fw-semibold">Language</label>
             <select name="language" class="form-select">
               <option value="English" {% if language == "English" %}selected{% endif %}>English</option>
-              <option value="Vietnamese" {% if language == "Vietnamese" %}selected{% endif %}>Vietnamese</option>
               <option value="Traditional Chinese" {% if language == "Traditional Chinese zh-TW" %}selected{% endif %}>
                 Traditional Chinese
               </option>
@@ -98,26 +102,30 @@ document.addEventListener("DOMContentLoaded", function () {
     div.textContent = value;
     return div.innerHTML;
   }
+  function normalizeMath(text) {
+    return text
+        .replace(/\\\\\[/g, "\\[")
+        .replace(/\\\\\]/g, "\\]")
+        .replace(/\\\\\(/g, "\\(")
+        .replace(/\\\\\)/g, "\\)")
+        .replace(/\\\\frac/g, "\\frac");
+  }
 
   function splitQuestions(text) {
+    // Remove everything before the first real numbered question
+    text = text.replace(/^[\s\S]*?(?=\n?\s*1[\.\)]\s+)/, "").trim();
+
     const blocks = text
-      .split(/\n(?=\s*(?:Question\s*)?\d+[\.\)]\s+)/i)
+      .split(/\n(?=\s*\d+[\.\)]\s+)/)
       .map(block => block.trim())
       .filter(Boolean);
-
-    if (blocks.length <= 1) {
-      return text
-        .split(/\n\s*\n/)
-        .map(block => block.trim())
-        .filter(Boolean);
-    }
 
     return blocks;
   }
 
   function findAnswerIndex(lines) {
     return lines.findIndex(line =>
-      /^(answer|correct answer|đáp án|答案)\s*[:：]/i.test(line.trim())
+      /^(answer|correct answer|答案|解答|正確答案|正确答案)\s*[:：]/i.test(line.trim())
     );
   }
 
@@ -149,6 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const question = document.createElement("div");
     question.className = "quiz-question-text";
+    const normalizedQuestion = normalizeMath(questionLines.join("\n"));
     question.innerHTML = escapeHtml(questionLines.join("\n")).replace(/\n/g, "<br>");
 
     body.appendChild(header);
@@ -162,6 +171,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const answer = document.createElement("div");
       answer.className = "quiz-answer-box mt-3 d-none";
+      const normalizedAnswer = normalizeMath(answerLines.join("\n"));
       answer.innerHTML = escapeHtml(answerLines.join("\n")).replace(/\n/g, "<br>");
 
       btn.addEventListener("click", function () {

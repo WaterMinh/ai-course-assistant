@@ -41,13 +41,15 @@
                     <button type="submit" name="regenerate" value="1" class="btn btn-outline-danger">
                         Regenerate
                     </button>
+                    <div class="d-flex gap-2 no-print">
+                        <button type="button" onclick="window.print()" class="btn btn-outline-dark btn-sm">
+                            Export PDF
+                        </button>
 
-                    <a
-                        class="btn btn-outline-secondary"
-                        href="/courses/{{ course.id }}"
-                    >
-                        Back to Course
-                    </a>
+                        <a href="/courses/{{ course.id }}" class="btn btn-outline-secondary btn-sm">
+                            Back to Course
+                        </a>
+                    </div>
                 </form>
 
                 {% if summary %}

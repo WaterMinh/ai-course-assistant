@@ -1,12 +1,14 @@
 import os
 import shutil
 
+
 from fastapi import FastAPI, Request, Depends, Form, UploadFile, File, HTTPException
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
+from datetime import timedelta
 
 from app.config import SECRET_KEY, UPLOAD_DIR
 from app.database import Base, engine, get_db, SessionLocal
@@ -784,6 +786,10 @@ def history_page(request: Request, db: Session = Depends(get_db)):
         .limit(30)
         .all()
     )
+
+    # Convert UTC time to Taiwan time UTC+8 for display
+    for item in items:
+        item.display_time = item.created_at + timedelta(hours=8)
 
     return templates.TemplateResponse(
         "history.html",

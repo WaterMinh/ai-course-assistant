@@ -10,16 +10,15 @@
         {% if items %}
             {% for item in items %}
                 <div class="border rounded-3 p-3 mb-3">
-                    <div class="fw-semibold">
-                        Q: {{ item.question }}
-                    </div>
+                    <p class="history-question">
+                        <strong>Q:</strong> {{ item.question }}
+                        </p>
 
-                    <div class="mt-2">
-                        A: {{ item.answer }}
-                    </div>
-
+                        <p class="history-answer">
+                        <strong>A:</strong> {{ item.answer }}
+                    </p>
                     <div class="text-muted small mt-2">
-                        {{ item.created_at }}
+                        {{ item.display_time.strftime('%Y-%m-%d %H:%M:%S') }}
                     </div>
                 </div>
             {% endfor %}
