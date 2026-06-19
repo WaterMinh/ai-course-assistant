@@ -775,8 +775,607 @@ main.container {
     }
 }
 
-.history-answer,
-.history-question {
-    white-space: pre-wrap;
-    line-height: 1.6;
+.history-page {
+    min-height: calc(100vh - 90px);
+    padding: 36px 42px 60px;
+    background:
+        radial-gradient(circle at top right, rgba(255, 214, 241, 0.75), transparent 34%),
+        radial-gradient(circle at top left, rgba(219, 234, 254, 0.7), transparent 30%),
+        linear-gradient(135deg, #fff7fb 0%, #f8efff 45%, #eef5ff 100%);
+}
+
+.history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.history-subtitle {
+    margin: 0 0 4px;
+    color: #9d4edd;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.history-title {
+    margin: 0;
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: #301934;
+}
+
+.history-header-badge {
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(157, 78, 221, 0.18);
+    color: #7b2cbf;
+    font-weight: 800;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.history-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 24px;
+    padding: 14px 20px 12px;
+    box-shadow: 0 18px 40px rgba(113, 63, 145, 0.10);
+    backdrop-filter: blur(14px);
+    text-align: left !important;
+}
+
+.history-message {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    margin-bottom: 7px !important;
+    text-align: left !important;
+}
+
+.history-label {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    font-weight: 900;
+}
+
+.question-label {
+    background: linear-gradient(135deg, #ede9fe, #f5d0fe);
+    color: #7e22ce;
+}
+
+.answer-label {
+    background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+    color: #db2777;
+}
+
+.history-bubble {
+    flex: 1 !important;
+    margin: 0 !important;
+    padding: 1px 0 0 !important;
+    color: #263041;
+    font-size: 1rem;
+    line-height: 1.42;
+    white-space: pre-line !important;
+    word-break: break-word;
+    text-align: left !important;
+}
+
+.question-bubble {
+    font-weight: 700;
+}
+
+.answer-bubble {
+    font-weight: 500;
+}
+
+.history-time {
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(148, 163, 184, 0.18);
+    text-align: right !important;
+    color: #7c7285;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+body:has(.history-page) {
+    background:
+        radial-gradient(circle at top right, rgba(255, 214, 241, 0.75), transparent 34%),
+        linear-gradient(135deg, #fff7fb 0%, #f8efff 45%, #eef5ff 100%) !important;
+}
+
+.history-card *,
+.history-message *,
+.history-bubble {
+    text-align: left !important;
+}
+
+.history-time {
+    text-align: right !important;
+}
+/* ================================
+   GLOBAL PINK / PURPLE THEME
+================================ */
+
+:root {
+    --bg-main: #fff7fb;
+    --bg-soft: #f8efff;
+    --bg-blue-soft: #eef5ff;
+
+    --pink: #ec4899;
+    --pink-dark: #be185d;
+    --purple: #9d4edd;
+    --purple-dark: #6b21a8;
+
+    --text-main: #25192f;
+    --text-muted: #7c7285;
+
+    --border-soft: rgba(157, 78, 221, 0.16);
+    --card-bg: rgba(255, 255, 255, 0.78);
+    --shadow-soft: 0 18px 40px rgba(113, 63, 145, 0.10);
+}
+
+/* Main background */
+html,
+body {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top right, rgba(255, 214, 241, 0.75), transparent 34%),
+        radial-gradient(circle at top left, rgba(219, 234, 254, 0.7), transparent 30%),
+        linear-gradient(135deg, #fff7fb 0%, #f8efff 45%, #eef5ff 100%) !important;
+    background-attachment: fixed;
+    color: var(--text-main);
+}
+
+/* Remove old blue glow */
+body::before,
+body::after {
+    display: none !important;
+}
+
+/* Main container */
+main.container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Navbar pink glass style */
+.app-navbar,
+.navbar {
+    background: rgba(255, 247, 251, 0.78) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(157, 78, 221, 0.14);
+    box-shadow: 0 10px 28px rgba(113, 63, 145, 0.08);
+}
+
+.navbar-brand {
+    color: #301934 !important;
+    font-weight: 900;
+}
+
+.brand-dot {
+    background: var(--pink);
+    box-shadow: 0 0 0 5px rgba(236, 72, 153, 0.16);
+}
+
+/* Nav buttons */
+.btn-nav {
+    color: #301934 !important;
+    border: 1px solid rgba(157, 78, 221, 0.22) !important;
+    background: rgba(255, 255, 255, 0.55) !important;
+}
+
+.btn-nav:hover {
+    color: #7e22ce !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(236, 72, 153, 0.45) !important;
+}
+
+.btn-admin {
+    background: linear-gradient(135deg, #fce7f3, #ede9fe) !important;
+    color: #7e22ce !important;
+    border: 1px solid rgba(157, 78, 221, 0.28) !important;
+}
+
+.btn-logout {
+    background: linear-gradient(135deg, #ec4899, #9d4edd) !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* Cards */
+.card,
+.course-card,
+.admin-stat-card,
+.quiz-card {
+    background: var(--card-bg) !important;
+    border: 1px solid rgba(255, 255, 255, 0.9) !important;
+    border-radius: 26px !important;
+    box-shadow: var(--shadow-soft) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+/* Card hover */
+.course-card:hover,
+.quiz-card:hover,
+.admin-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 24px 55px rgba(113, 63, 145, 0.16) !important;
+    border-color: rgba(236, 72, 153, 0.28) !important;
+}
+
+/* Titles */
+.page-title,
+h1,
+h2,
+h3,
+h4,
+h5 {
+    color: #25192f;
+}
+
+/* Muted text */
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* Primary button */
+.btn-primary {
+    background: linear-gradient(135deg, #ec4899, #9d4edd) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 10px 22px rgba(236, 72, 153, 0.18);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #db2777, #7e22ce) !important;
+    transform: translateY(-1px);
+}
+
+/* Outline buttons */
+.btn-outline-primary {
+    color: #7e22ce !important;
+    border-color: rgba(157, 78, 221, 0.45) !important;
+    background: rgba(255, 255, 255, 0.45) !important;
+}
+
+.btn-outline-primary:hover {
+    color: white !important;
+    background: linear-gradient(135deg, #ec4899, #9d4edd) !important;
+    border-color: transparent !important;
+}
+
+.btn-outline-secondary {
+    color: #6b7280 !important;
+    border-color: rgba(124, 114, 133, 0.28) !important;
+    background: rgba(255, 255, 255, 0.45) !important;
+}
+
+.btn-outline-success {
+    color: #15803d !important;
+    border-color: rgba(34, 197, 94, 0.35) !important;
+    background: rgba(255, 255, 255, 0.45) !important;
+}
+
+.btn-outline-danger {
+    color: #be123c !important;
+    border-color: rgba(244, 63, 94, 0.35) !important;
+    background: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Forms */
+.form-control,
+.form-select {
+    background: rgba(255, 255, 255, 0.78) !important;
+    border: 1px solid rgba(157, 78, 221, 0.18) !important;
+    color: #25192f !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: rgba(236, 72, 153, 0.55) !important;
+    box-shadow: 0 0 0 0.22rem rgba(236, 72, 153, 0.14) !important;
+}
+
+/* List group */
+.list-group-item {
+    background: rgba(255, 255, 255, 0.72) !important;
+    border: 1px solid rgba(157, 78, 221, 0.12) !important;
+    border-radius: 18px !important;
+}
+
+/* Chat page */
+.chat-card {
+    background: rgba(255, 255, 255, 0.78) !important;
+    border-radius: 28px !important;
+}
+
+.chat-box {
+    background:
+        radial-gradient(circle at top right, rgba(255, 214, 241, 0.45), transparent 35%),
+        linear-gradient(135deg, #fff7fb 0%, #f8efff 55%, #eef5ff 100%) !important;
+}
+
+.user-message {
+    background: linear-gradient(135deg, #ec4899, #9d4edd) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.bot-message {
+    background: rgba(255, 255, 255, 0.86) !important;
+    color: #25192f !important;
+    border: 1px solid rgba(157, 78, 221, 0.14) !important;
+}
+
+/* Quiz */
+.quiz-question-number {
+    background: linear-gradient(135deg, #ede9fe, #fce7f3) !important;
+    color: #7e22ce !important;
+}
+
+.quiz-answer-box {
+    background: rgba(240, 253, 244, 0.8) !important;
+    border: 1px solid rgba(34, 197, 94, 0.22) !important;
+    color: #14532d !important;
+}
+
+/* Admin */
+.stat-label {
+    color: #9d4edd !important;
+}
+
+.stat-value {
+    color: #25192f !important;
+}
+
+.admin-table thead th {
+    color: #7c7285 !important;
+}
+
+.admin-table tbody td {
+    border-bottom: 1px solid rgba(157, 78, 221, 0.10) !important;
+}
+
+/* Alerts */
+.alert {
+    background: rgba(255, 255, 255, 0.72) !important;
+    border: 1px solid rgba(157, 78, 221, 0.16) !important;
+    color: #25192f !important;
+}
+
+/* Summary / quiz export cards */
+hr {
+    border-color: rgba(157, 78, 221, 0.22) !important;
+}
+
+/* Keep print clean */
+@media print {
+    html,
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    .card,
+    .quiz-card {
+        background: white !important;
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+}
+/* ================================
+   COURSES PAGE - PINK THEME
+================================ */
+
+.courses-page {
+    padding: 34px 4px 60px;
+}
+
+.courses-header {
+    margin-bottom: 28px;
+}
+
+.courses-subtitle {
+    margin: 0 0 4px;
+    color: #9d4edd;
+    font-size: 0.92rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.courses-title {
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 950;
+    color: #25192f;
+    letter-spacing: -0.05em;
+}
+
+.courses-description {
+    margin-top: 12px;
+    max-width: 760px;
+    color: #7c7285;
+    font-size: 1.1rem;
+    line-height: 1.65;
+}
+
+.course-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 330px;
+    padding: 30px 32px;
+    border-radius: 30px !important;
+    background:
+        radial-gradient(circle at top right, rgba(255, 214, 241, 0.7), transparent 36%),
+        rgba(255, 255, 255, 0.78) !important;
+    border: 1px solid rgba(255, 255, 255, 0.95) !important;
+    box-shadow:
+        0 18px 45px rgba(113, 63, 145, 0.11),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition:
+        transform 0.22s ease,
+        box-shadow 0.22s ease,
+        border-color 0.22s ease;
+}
+
+.course-card::before {
+    content: "";
+    position: absolute;
+    width: 170px;
+    height: 170px;
+    right: -60px;
+    top: -60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.18), transparent 68%);
+    pointer-events: none;
+}
+
+.course-card::after {
+    content: "";
+    position: absolute;
+    width: 130px;
+    height: 130px;
+    left: -45px;
+    bottom: -45px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(157, 78, 221, 0.13), transparent 68%);
+    pointer-events: none;
+}
+
+.course-card:hover {
+    transform: translateY(-8px);
+    box-shadow:
+        0 28px 70px rgba(113, 63, 145, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(236, 72, 153, 0.28) !important;
+}
+
+.course-card-top {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.course-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fce7f3, #ede9fe);
+    color: #7e22ce;
+    font-weight: 950;
+    font-size: 1rem;
+    box-shadow: 0 12px 26px rgba(157, 78, 221, 0.12);
+}
+
+.course-badge {
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(157, 78, 221, 0.16);
+    color: #9d4edd;
+    font-size: 0.82rem;
+    font-weight: 850;
+}
+
+.course-code {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 8px;
+    font-size: 1.65rem;
+    font-weight: 950;
+    color: #25192f;
+    letter-spacing: -0.04em;
+}
+
+.course-name {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 14px;
+    color: #31243c;
+    font-size: 1.16rem;
+    font-weight: 750;
+    line-height: 1.4;
+}
+
+.course-description-text {
+    position: relative;
+    z-index: 1;
+    min-height: 106px;
+    margin: 0 0 24px;
+    color: #7c7285;
+    font-size: 0.98rem;
+    line-height: 1.65;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.course-actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.course-actions .btn {
+    padding: 0.7rem 1.2rem;
+    border-radius: 14px;
+    font-weight: 850;
+}
+
+.courses-empty {
+    padding: 34px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.76);
+    border: 1px solid rgba(157, 78, 221, 0.16);
+    color: #7c7285;
+    font-weight: 800;
+    text-align: center;
+    box-shadow: 0 18px 40px rgba(113, 63, 145, 0.10);
+}
+
+@media (max-width: 768px) {
+    .courses-title {
+        font-size: 2.35rem;
+    }
+
+    .course-card {
+        padding: 24px 22px;
+        min-height: auto;
+    }
+
+    .course-description-text {
+        min-height: auto;
+    }
 }

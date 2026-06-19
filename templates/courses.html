@@ -1,65 +1,57 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-10 mx-auto">
-        <div class="card shadow border-0 rounded-4">
-            <div class="card-body p-4">
-                <h3 class="fw-bold mb-3">
-                    Courses
-                </h3>
+<div class="courses-page">
 
-                <p class="text-muted">
-                    Choose a course to ask questions based on its uploaded documents.
-                </p>
-
-                {% if courses %}
-                    <div class="row g-3">
-                        {% for course in courses %}
-                            <div class="col-md-6">
-                                <div class="card course-card border rounded-4 h-100">
-                                    <div class="card-body">
-                                        <h5 class="fw-bold">
-                                            {{ course.course_code }}
-                                        </h5>
-
-                                        <div class="mb-2">
-                                            {{ course.course_name }}
-                                        </div>
-
-                                        {% if course.description %}
-                                            <p class="course-description text-muted small">
-                                                {{ course.description }}
-                                            </p>
-                                        {% endif %}
-
-                                        <div class="d-flex gap-2 mt-4">
-                                            <a
-                                                class="btn btn-primary btn-sm"
-                                                href="/courses/{{ course.id }}"
-                                            >
-                                                Open Course
-                                            </a>
-
-                                            <a
-                                                class="btn btn-outline-secondary btn-sm"
-                                                href="/courses/{{ course.id }}/chat"
-                                            >
-                                                Quick Chat
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        No courses yet. Admin needs to create courses first.
-                    </div>
-                {% endif %}
-            </div>
-        </div>
+    <div class="courses-header">
+        <p class="courses-subtitle">Learning Space</p>
+        <h1 class="courses-title">Courses</h1>
+        <p class="courses-description">
+            Choose a course to ask questions based on its uploaded documents.
+        </p>
     </div>
+
+    {% if courses %}
+        <div class="row g-4">
+            {% for course in courses %}
+                <div class="col-md-6">
+                    <div class="course-card h-100">
+
+                        <div class="course-card-top">
+                            <div class="course-icon">
+                                {{ course.course_code }}
+                            </div>
+                            <div class="course-badge">
+                                AI Ready
+                            </div>
+                        </div>
+
+                        <h3 class="course-code">{{ course.course_code }}</h3>
+                        <h4 class="course-name">{{ course.course_name }}</h4>
+
+                        <p class="course-description-text">
+                            {{ course.description }}
+                        </p>
+
+                        <div class="course-actions">
+                            <a href="/courses/{{ course.id }}" class="btn btn-primary">
+                                Open Course
+                            </a>
+
+                            <a href="/courses/{{ course.id }}/chat" class="btn btn-outline-secondary">
+                                Quick Chat
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="courses-empty">
+            No courses available yet.
+        </div>
+    {% endif %}
+
 </div>
 {% endblock %}

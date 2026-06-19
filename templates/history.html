@@ -1,32 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="card shadow border-0 rounded-4">
-    <div class="card-body p-4">
-        <h4 class="fw-bold mb-3">
-            Chat History
-        </h4>
+<div class="history-page">
 
-        {% if items %}
+    <div class="history-header">
+        <div>
+            <p class="history-subtitle">Learning Record</p>
+            <h1 class="history-title">Chat History</h1>
+        </div>
+        <div class="history-header-badge">
+            AI Course Assistant
+        </div>
+    </div>
+
+    {% if items %}
+        <div class="history-list">
             {% for item in items %}
-                <div class="border rounded-3 p-3 mb-3">
-                    <p class="history-question">
-                        <strong>Q:</strong> {{ item.question }}
-                        </p>
+                <div class="history-card">
 
-                        <p class="history-answer">
-                        <strong>A:</strong> {{ item.answer }}
-                    </p>
-                    <div class="text-muted small mt-2">
-                        {{ item.display_time.strftime('%Y-%m-%d %H:%M:%S') }}
+                    <div class="history-message">
+                        <div class="history-label question-label">Q</div>
+                        <div class="history-bubble question-bubble">{{ item.question | trim }}</div>
                     </div>
+
+                    <div class="history-message">
+                        <div class="history-label answer-label">A</div>
+                        <div class="history-bubble answer-bubble">{{ item.answer | trim }}</div>
+                    </div>
+
+                    <div class="history-time">
+                        {{ item.display_time.strftime("%Y-%m-%d %H:%M:%S") }}
+                    </div>
+
                 </div>
             {% endfor %}
-        {% else %}
-            <div class="text-muted">
-                No chat history yet.
-            </div>
-        {% endif %}
-    </div>
+        </div>
+    {% else %}
+        <div class="history-empty">
+            No chat history yet.
+        </div>
+    {% endif %}
+
 </div>
 {% endblock %}
