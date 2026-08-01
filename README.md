@@ -16,19 +16,14 @@ A local AI-powered learning platform that transforms static course materials int
 - 👨‍🏫 Role-based admin dashboard for course and document management
   
 ---
-## 📖 Overview
+## Overview
 
 AI Course Assistant is a locally hosted learning platform that transforms static course materials into interactive learning resources using local Large Language Models (LLMs).
 
-Administrators can create courses and upload learning documents, while students can interact with course materials through AI-powered conversations, multilingual summaries, automatically generated quizzes, and PDF exports.
+The platform allows administrators to manage courses and learning documents, while students can ask questions, generate multilingual summaries, create quizzes, and export learning materials as PDFs.
 
-Built with FastAPI, MySQL, Docker, and LM Studio, the project demonstrates how backend development, document processing, and local AI can be integrated into a practical educational application.
----
-## 🎯 Motivation
+Built with FastAPI, MySQL, Docker, and LM Studio.
 
-Traditional course materials are often static and difficult to review efficiently.
-
-This project explores how local Large Language Models can transform uploaded course documents into interactive learning resources while keeping all data processed locally.
 ---
 ## 🏗️ Architecture
 
