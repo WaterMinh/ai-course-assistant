@@ -1,13 +1,47 @@
 # AI Course Assistant
 
-AI Course Assistant is a local AI-powered learning platform for courses and uploaded study documents.
+A local AI-powered learning platform that transforms static course materials into interactive learning experiences using local Large Language Models (LLMs).
 
-The system allows an admin to create courses, upload course documents, and let students ask questions, generate document summaries, create quizzes, export learning content as PDF, and review chat history based on course materials.
+<p align="center">
+  <img src="images/dashboard.png" alt="Dashboard" width="900">
+</p>
 
-The project runs locally with FastAPI, MySQL, Docker, and LM Studio.
+## ✨ Highlights
 
+- 🤖 Local AI learning assistant powered by LM Studio
+- 📚 Course-grounded chat based on uploaded documents
+- 📝 AI-generated multilingual summaries
+- ❓ Automatic quiz generation with answer explanations
+- 📄 One-click PDF export for summaries and quizzes
+- 👨‍🏫 Role-based admin dashboard for course and document management
+  
 ---
+## Overview
 
+AI Course Assistant is a locally hosted learning platform designed to transform static course materials into interactive study resources.
+
+Administrators can create courses and upload learning documents, while students can interact with course content through AI-powered conversations, multilingual summaries, automatically generated quizzes, and PDF exports.
+
+The project integrates FastAPI, MySQL, Docker, and LM Studio to demonstrate how modern AI technologies can enhance personalized learning while keeping all data processed locally.
+---
+## Architecture
+
+Browser
+      │
+      ▼
+FastAPI + Jinja2
+      │
+ ┌────┴────┐
+ │         │
+ ▼         ▼
+MySQL   LM Studio
+---
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Framework-green)
+![MySQL](https://img.shields.io/badge/MySQL-Database-blue)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)
+![LM Studio](https://img.shields.io/badge/Local%20LLM-LM%20Studio-orange)
+---
 ## Features
 
 * User login system
