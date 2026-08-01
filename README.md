@@ -3,7 +3,7 @@
 A local AI-powered learning platform that transforms static course materials into interactive learning experiences using local Large Language Models (LLMs).
 
 <p align="center">
-  <img src="images/dashboard.png" alt="Dashboard" width="900">
+  <img src="images/Admin_Dashboard.png" alt="Dashboard" width="900">
 </p>
 
 ## ✨ Highlights
@@ -24,17 +24,34 @@ Administrators can create courses and upload learning documents, while students 
 
 The project integrates FastAPI, MySQL, Docker, and LM Studio to demonstrate how modern AI technologies can enhance personalized learning while keeping all data processed locally.
 ---
-## Architecture
+## 🏗️ Architecture
 
-Browser
-      │
-      ▼
-FastAPI + Jinja2
-      │
- ┌────┴────┐
- │         │
- ▼         ▼
-MySQL   LM Studio
+```mermaid
+flowchart TD
+    U[Browser]
+
+    U --> F[FastAPI Backend]
+
+    F --> DB[(MySQL Database)]
+
+    F --> DOC[Document Processing]
+
+    DOC --> CHUNK[Text Chunking]
+
+    CHUNK --> LLM[LM Studio Local LLM]
+
+    LLM --> CHAT[Course Chat]
+
+    LLM --> SUM[Summary Generator]
+
+    LLM --> QUIZ[Quiz Generator]
+
+    DB --> CACHE[Summary & Quiz Cache]
+
+    CHAT --> U
+    SUM --> U
+    QUIZ --> U
+```
 ---
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Framework-green)
